@@ -33,19 +33,24 @@ export async function signUpUser(email: string, password: string, name: string, 
 
   console.log("[v0] Signup successful:", data)
 
-  // Set session cookie
   const cookieStore = await cookies()
   cookieStore.set("user_email", email, {
-    httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: "/",
   })
   cookieStore.set("user_role", role, {
-    httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7,
+    path: "/",
+  })
+  cookieStore.set("user_name", name, {
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7,
+    path: "/",
   })
 
   return { data }
@@ -75,19 +80,24 @@ export async function loginUser(email: string, password: string) {
 
   console.log("[v0] Login successful:", user)
 
-  // Set session cookie
   const cookieStore = await cookies()
   cookieStore.set("user_email", email, {
-    httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: "/",
   })
   cookieStore.set("user_role", user.role, {
-    httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7,
+    path: "/",
+  })
+  cookieStore.set("user_name", user.display_name, {
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7,
+    path: "/",
   })
 
   return { data: user }
@@ -97,17 +107,16 @@ export async function logoutUser() {
   const cookieStore = await cookies()
   cookieStore.delete("user_email")
   cookieStore.delete("user_role")
+  cookieStore.delete("user_name")
 }
 
 export async function getCurrentUser() {
   const cookieStore = await cookies()
   const email = cookieStore.get("user_email")?.value
   const role = cookieStore.get("user_role")?.value
+  const displayName = cookieStore.get("user_name")?.value
 
   if (!email) return null
 
-  const supabase = await createClient()
-  const { data: user } = await supabase.from("app_users").select("display_name").eq("email", email).maybeSingle()
-
-  return { email, role, displayName: user?.display_name || email }
+  return { email, role, displayName: displayName || email }
 }
