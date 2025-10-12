@@ -4,31 +4,17 @@ import { useState } from "react"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, Trash2 } from "lucide-react"
+import { Menu } from "lucide-react"
 import { MissionTab } from "@/components/tabs/mission-tab"
 import { TermsTab } from "@/components/tabs/terms-tab"
 import { UsersTab } from "@/components/tabs/users-tab"
 import { HostsTab } from "@/components/tabs/hosts-tab"
 import { CooksTab } from "@/components/tabs/cooks-tab"
 import { GuideTab } from "@/components/tabs/guide-tab"
-import { resetAppData } from "@/lib/local-storage"
-import { useToast } from "@/hooks/use-toast"
 
 export default function HomePage() {
-  const { toast } = useToast()
   const [activeTab, setActiveTab] = useState("mission")
   const [menuOpen, setMenuOpen] = useState(false)
-
-  const handleReset = () => {
-    if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
-      resetAppData()
-      toast({
-        title: "Data Cleared",
-        description: "All events, hosts, and cooks have been removed.",
-      })
-      setTimeout(() => window.location.reload(), 500)
-    }
-  }
 
   const navItems = [
     { value: "mission", label: "Mission" },
@@ -54,7 +40,7 @@ export default function HomePage() {
             backgroundImage: `url('/images/cooking-together.png')`,
             filter: "blur(3px)",
             opacity: 0.7,
-            transform: "scale(1.1)", // Prevents blur edge artifacts
+            transform: "scale(1.1)",
           }}
         />
 
@@ -106,20 +92,17 @@ export default function HomePage() {
             </SheetContent>
           </Sheet>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            className="absolute right-0 top-0 text-orange-300 hover:text-red-400 hover:bg-red-950/30 text-xs sm:text-sm"
-          >
-            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Clear All Data</span>
-            <span className="sm:hidden">Clear</span>
-          </Button>
+          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3">
+            <img
+              src="/images/logo.png"
+              alt="CultureBites Logo"
+              className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 object-contain"
+            />
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-balance bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent">
+              CultureBites
+            </h1>
+          </div>
 
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-balance mb-2 sm:mb-3 bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent">
-            CultureBites
-          </h1>
           <p className="text-sm sm:text-xl text-orange-100 text-balance font-medium tracking-wide">
             Meet, Greet, Eat, Repeat
           </p>
