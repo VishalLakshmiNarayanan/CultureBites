@@ -346,9 +346,9 @@
 /* Updated mobile styles to fix card visibility and ensure proper height */
 @media (max-width: 768px) {
   .flip-card-container {
-    height: 500px; /* Fixed height instead of auto to ensure cards are visible */
-    min-height: 500px;
-    max-height: 600px;
+    height: 650px; /* Increased from 500px to show all content including profile images */
+    min-height: 650px;
+    max-height: 85vh; /* Allow up to 85% of viewport height */
     width: 100%;
   }
 
@@ -363,13 +363,15 @@
 
   .card-back {
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   }
 
   .card-back > div {
     height: auto;
     min-height: 100%;
-    overflow-y: auto;
-    padding-bottom: 2rem; /* Extra padding at bottom for scrolling */
+    overflow-y: auto; /* Changed from visible to auto to enable proper scrolling */
+    padding-top: 1rem; /* Added top padding to ensure profile images are visible */
+    padding-bottom: 3rem; /* Keep bottom padding for better scrolling */
   }
 }
