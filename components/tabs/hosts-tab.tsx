@@ -11,7 +11,13 @@ import { HostProfileWizard } from "@/components/host-profile-wizard"
 import { CookCard } from "@/components/cook-card"
 import { CollaborationRequestDialog } from "@/components/collaboration-request-dialog"
 import { Plus, MapPin, Users } from "lucide-react"
-import { getAppData, saveAppData } from "@/lib/local-storage"
+import {
+  getAppData,
+  updateCollaborationStatus,
+  assignCookToEvent,
+  updateSeatRequestStatus,
+  updateEventSeats,
+} from "@/lib/local-storage"
 import { useToast } from "@/hooks/use-toast"
 import type { Host, Event, SeatRequest, CollaborationRequest, Cook } from "@/lib/types"
 
@@ -76,112 +82,126 @@ export function HostsTab() {
   const selectedHost = myHosts.find((h) => h.id === selectedHostId)
 
   const handleAcceptCollaboration = async (requestId: string) => {
-    const data = await getAppData()
-    const request = data.collaborationRequests.find((r) => r.id === requestId)
+    try {
+      const data = await getAppData()
+      const request = data.collaborationRequests.find((r) => r.id === requestId)
 
-    const updatedRequests = data.collaborationRequests.map((r) =>
-      r.id === requestId ? { ...r, status: "accepted" as const } : r,
-    )
+      // Update collaboration request status
+      await updateCollaborationStatus(requestId, "accepted")
 
-    let updatedEvents = data.events
-    if (request?.eventId) {
-      updatedEvents = data.events.map((e) => (e.id === request.eventId ? { ...e, cookId: request.fromCookId } : e))
+      // If there's an event, assign the cook to it
+      if (request?.eventId) {
+        await assignCookToEvent(request.eventId, request.fromCookId)
+      }
+
+      toast({
+        title: "Request accepted",
+        description: "The collaboration request has been accepted. The cook has been assigned to the event.",
+      })
+
+      await refreshData()
+    } catch (error) {
+      console.error("[v0] Error accepting collaboration:", error)
+      toast({
+        title: "Error",
+        description: "Failed to accept collaboration request. Please try again.",
+        variant: "destructive",
+      })
     }
-
-    saveAppData({
-      ...data,
-      collaborationRequests: updatedRequests,
-      events: updatedEvents,
-    })
-
-    toast({
-      title: "Request accepted",
-      description: "The collaboration request has been accepted. The cook has been assigned to the event.",
-    })
-
-    refreshData()
   }
 
   const handleDeclineCollaboration = async (requestId: string) => {
-    const data = await getAppData()
-    const updatedRequests = data.collaborationRequests.map((r) =>
-      r.id === requestId ? { ...r, status: "declined" as const } : r,
-    )
+    try {
+      await updateCollaborationStatus(requestId, "declined")
 
-    saveAppData({
-      ...data,
-      collaborationRequests: updatedRequests,
-    })
+      toast({
+        title: "Request declined",
+        description: "The collaboration request has been declined.",
+      })
 
-    toast({
-      title: "Request declined",
-      description: "The collaboration request has been declined.",
-    })
-
-    refreshData()
+      await refreshData()
+    } catch (error) {
+      console.error("[v0] Error declining collaboration:", error)
+      toast({
+        title: "Error",
+        description: "Failed to decline collaboration request. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleApproveSeat = async (requestId: string) => {
-    const data = await getAppData()
-    const updatedRequests = data.seatRequests.map((r) =>
-      r.id === requestId ? { ...r, status: "approved" as const } : r,
-    )
+    try {
+      await updateSeatRequestStatus(requestId, "approved")
 
-    saveAppData({
-      ...data,
-      seatRequests: updatedRequests,
-    })
+      toast({
+        title: "Seat approved",
+        description: "The seat request has been approved.",
+      })
 
-    toast({
-      title: "Seat approved",
-      description: "The seat request has been approved.",
-    })
-
-    refreshData()
+      await refreshData()
+    } catch (error) {
+      console.error("[v0] Error approving seat:", error)
+      toast({
+        title: "Error",
+        description: "Failed to approve seat request. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleWaitlistSeat = async (requestId: string, eventId: string) => {
-    const data = await getAppData()
-    const updatedRequests = data.seatRequests.map((r) =>
-      r.id === requestId ? { ...r, status: "waitlist" as const } : r,
-    )
+    try {
+      await updateSeatRequestStatus(requestId, "waitlist")
 
-    const updatedEvents = data.events.map((e) => (e.id === eventId ? { ...e, seatsLeft: e.seatsLeft + 1 } : e))
+      // Restore the seat
+      const data = await getAppData()
+      const event = data.events.find((e) => e.id === eventId)
+      if (event) {
+        await updateEventSeats(eventId, event.seatsLeft + 1)
+      }
 
-    saveAppData({
-      ...data,
-      seatRequests: updatedRequests,
-      events: updatedEvents,
-    })
+      toast({
+        title: "Added to waitlist",
+        description: "The guest has been added to the waitlist.",
+      })
 
-    toast({
-      title: "Added to waitlist",
-      description: "The guest has been added to the waitlist.",
-    })
-
-    refreshData()
+      await refreshData()
+    } catch (error) {
+      console.error("[v0] Error waitlisting seat:", error)
+      toast({
+        title: "Error",
+        description: "Failed to add to waitlist. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleDeclineSeat = async (requestId: string, eventId: string) => {
-    const data = await getAppData()
-    const updatedRequests = data.seatRequests.map((r) =>
-      r.id === requestId ? { ...r, status: "declined" as const } : r,
-    )
+    try {
+      await updateSeatRequestStatus(requestId, "declined")
 
-    const updatedEvents = data.events.map((e) => (e.id === eventId ? { ...e, seatsLeft: e.seatsLeft + 1 } : e))
+      // Restore the seat
+      const data = await getAppData()
+      const event = data.events.find((e) => e.id === eventId)
+      if (event) {
+        await updateEventSeats(eventId, event.seatsLeft + 1)
+      }
 
-    saveAppData({
-      ...data,
-      seatRequests: updatedRequests,
-      events: updatedEvents,
-    })
+      toast({
+        title: "Request declined",
+        description: "The seat request has been declined and the seat restored.",
+      })
 
-    toast({
-      title: "Request declined",
-      description: "The seat request has been declined and the seat restored.",
-    })
-
-    refreshData()
+      await refreshData()
+    } catch (error) {
+      console.error("[v0] Error declining seat:", error)
+      toast({
+        title: "Error",
+        description: "Failed to decline seat request. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleRequestCookCollaboration = (cook: Cook) => {

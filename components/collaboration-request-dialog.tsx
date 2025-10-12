@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,9 +9,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { getAppData, saveAppData } from "@/lib/local-storage"
+import { getAppData, addCollaborationRequest } from "@/lib/local-storage"
 import { X } from "lucide-react"
-import type { Host, Cook, CollaborationRequest } from "@/lib/types"
+import type { Host, Cook, CollaborationRequest, Event } from "@/lib/types"
 
 interface CollaborationRequestDialogProps {
   open: boolean
@@ -38,7 +37,21 @@ export function CollaborationRequestDialog({
   const [message, setMessage] = useState("")
   const [proposedDishes, setProposedDishes] = useState<string[]>([])
   const [currentDish, setCurrentDish] = useState("")
+  const [event, setEvent] = useState<Event | null>(null)
   const { toast } = useToast()
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      if (eventId && open) {
+        const data = await getAppData()
+        const foundEvent = data.events?.find((e) => e.id === eventId) || null
+        setEvent(foundEvent)
+      } else {
+        setEvent(null)
+      }
+    }
+    fetchEvent()
+  }, [eventId, open])
 
   const addDish = () => {
     if (currentDish.trim() && proposedDishes.length < 5) {
@@ -51,7 +64,7 @@ export function CollaborationRequestDialog({
     setProposedDishes(proposedDishes.filter((_, i) => i !== index))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!message.trim()) {
@@ -63,38 +76,40 @@ export function CollaborationRequestDialog({
       return
     }
 
-    const data = getAppData()
-
     const newRequest: CollaborationRequest = {
       id: `collab-${Date.now()}`,
       fromCookId: cookId || cook?.id || "",
       toHostId: hostId || host?.id || "",
-      eventId: eventId, // Include eventId in the request
+      eventId: eventId,
       message: message.trim(),
       proposedDishes,
       status: "pending",
       createdAtISO: new Date().toISOString(),
     }
 
-    saveAppData({
-      ...data,
-      collaborationRequests: [...data.collaborationRequests, newRequest],
-    })
+    try {
+      await addCollaborationRequest(newRequest)
 
-    const recipientName = host?.name || cook?.name || "them"
-    toast({
-      title: "Request sent!",
-      description: `Your collaboration request has been sent to ${recipientName}.`,
-    })
+      const recipientName = host?.name || cook?.name || "them"
+      toast({
+        title: "Request sent!",
+        description: `Your collaboration request has been sent to ${recipientName}.`,
+      })
 
-    setMessage("")
-    setProposedDishes([])
-    setCurrentDish("")
-    onOpenChange(false)
-    onSuccess()
+      setMessage("")
+      setProposedDishes([])
+      setCurrentDish("")
+      onOpenChange(false)
+      onSuccess()
+    } catch (error) {
+      console.error("[v0] Error sending collaboration request:", error)
+      toast({
+        title: "Error",
+        description: "Failed to send collaboration request. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
-
-  const event = eventId ? getAppData().events.find((e) => e.id === eventId) : null
 
   const title = host ? `Request to Collaborate with ${host.name}` : `Request to Collaborate with ${cook?.name}`
   const subtitle = host ? `${host.spaceTitle}` : `${cook?.specialties.join(", ")}`

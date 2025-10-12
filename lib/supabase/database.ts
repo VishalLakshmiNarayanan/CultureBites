@@ -1,97 +1,79 @@
 import { createClient } from "./client"
 import type { Event, Host, Cook, CollaborationRequest, SeatRequest } from "@/lib/types"
 
-// Hosts
-export async function getAllHosts(): Promise<Host[]> {
+const PAGE_SIZE = 24
+
+type Page<T> = { items: T[]; nextOffset: number | null }
+
+export async function listHosts(offset = 0, limit = PAGE_SIZE): Promise<Page<Host>> {
   const supabase = createClient()
-  const { data, error } = await supabase.from("hosts").select("*").order("created_at", { ascending: false })
+  const { data, error } = await supabase
+    .from("hosts")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("[v0] Error fetching hosts:", error)
-    return []
+    return { items: [], nextOffset: null }
   }
 
-  return (data || []).map((row) => ({
+  const hosts = (data || []).map((row) => ({
     id: row.id,
     name: row.name,
-    profileImage: row.profile_image,
-    spaceTitle: row.space_title,
-    spaceDesc: row.space_desc,
+    profileImage: row.images?.[0] || "", // First image is the profile image
+    spaceTitle: row.space_type,
+    spaceDesc: row.description,
     location: row.location,
     capacity: row.capacity,
-    photos: row.photos || [],
+    photos: row.images?.slice(1) || [], // Rest of images are photos
   }))
+
+  const nextOffset = data.length < limit ? null : offset + limit
+  return { items: hosts, nextOffset }
 }
 
-export async function createHost(host: Host): Promise<void> {
+export async function listCooks(offset = 0, limit = PAGE_SIZE): Promise<Page<Cook>> {
   const supabase = createClient()
-  const { error } = await supabase.from("hosts").insert({
-    id: host.id,
-    name: host.name,
-    profile_image: host.profileImage,
-    space_title: host.spaceTitle,
-    space_desc: host.spaceDesc,
-    location: host.location,
-    capacity: host.capacity,
-    photos: host.photos,
-  })
-
-  if (error) {
-    console.error("[v0] Error creating host:", error)
-    throw error
-  }
-}
-
-// Cooks
-export async function getAllCooks(): Promise<Cook[]> {
-  const supabase = createClient()
-  const { data, error } = await supabase.from("cooks").select("*").order("created_at", { ascending: false })
+  const { data, error } = await supabase
+    .from("cooks")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("[v0] Error fetching cooks:", error)
-    return []
+    return { items: [], nextOffset: null }
   }
 
-  return (data || []).map((row) => ({
+  const cooks = (data || []).map((row) => ({
     id: row.id,
     name: row.name,
-    profileImage: row.profile_image,
+    profileImage: row.profile_picture,
     originCountry: row.origin_country,
     specialties: row.specialties || [],
     story: row.story,
     cuisineImages: row.cuisine_images || [],
   }))
+
+  const nextOffset = data.length < limit ? null : offset + limit
+  return { items: cooks, nextOffset }
 }
 
-export async function createCook(cook: Cook): Promise<void> {
+export async function listEvents(offset = 0, limit = PAGE_SIZE): Promise<Page<Event>> {
   const supabase = createClient()
-  const { error } = await supabase.from("cooks").insert({
-    id: cook.id,
-    name: cook.name,
-    profile_image: cook.profileImage,
-    origin_country: cook.originCountry,
-    specialties: cook.specialties,
-    story: cook.story,
-    cuisine_images: cook.cuisineImages,
-  })
-
-  if (error) {
-    console.error("[v0] Error creating cook:", error)
-    throw error
-  }
-}
-
-// Events
-export async function getAllEvents(): Promise<Event[]> {
-  const supabase = createClient()
-  const { data, error } = await supabase.from("events").select("*").order("created_at", { ascending: false })
+  const { data, error } = await supabase
+    .from("events")
+    .select("*")
+    .order("date_iso", { ascending: true })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("[v0] Error fetching events:", error)
-    return []
+    return { items: [], nextOffset: null }
   }
 
-  return (data || []).map((row) => ({
+  const events = (data || []).map((row) => ({
     id: row.id,
     title: row.title,
     cuisine: row.cuisine,
@@ -105,6 +87,133 @@ export async function getAllEvents(): Promise<Event[]> {
     seatsTotal: row.seats_total,
     seatsLeft: row.seats_left,
   }))
+
+  const nextOffset = data.length < limit ? null : offset + limit
+  return { items: events, nextOffset }
+}
+
+export async function listCollaborationRequests(offset = 0, limit = PAGE_SIZE): Promise<Page<CollaborationRequest>> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("collaboration_requests")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    console.error("[v0] Error fetching collaboration requests:", error)
+    return { items: [], nextOffset: null }
+  }
+
+  const requests = (data || []).map((row) => ({
+    id: row.id,
+    fromCookId: row.cook_id,
+    toHostId: row.host_id,
+    eventId: row.event_id,
+    message: row.message,
+    proposedDishes: [], // Not in new schema
+    status: row.status as "pending" | "accepted" | "declined",
+    createdAtISO: row.created_at_iso,
+  }))
+
+  const nextOffset = data.length < limit ? null : offset + limit
+  return { items: requests, nextOffset }
+}
+
+export async function listSeatRequests(offset = 0, limit = PAGE_SIZE): Promise<Page<SeatRequest>> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("seat_requests")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    console.error("[v0] Error fetching seat requests:", error)
+    return { items: [], nextOffset: null }
+  }
+
+  const requests = (data || []).map((row) => ({
+    id: row.id,
+    eventId: row.event_id,
+    guestName: row.guest_name,
+    note: row.dietary_restrictions || "",
+    createdAtISO: row.created_at_iso,
+    status: (row.status || "pending") as "pending" | "approved" | "declined" | "waitlist",
+  }))
+
+  const nextOffset = data.length < limit ? null : offset + limit
+  return { items: requests, nextOffset }
+}
+
+export async function listSeatRequestsByEvent(
+  eventId: string,
+  offset = 0,
+  limit = PAGE_SIZE,
+): Promise<Page<SeatRequest>> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("seat_requests")
+    .select("*")
+    .eq("event_id", eventId)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    console.error("[v0] Error fetching seat requests:", error)
+    return { items: [], nextOffset: null }
+  }
+
+  const requests = (data || []).map((row) => ({
+    id: row.id,
+    eventId: row.event_id,
+    guestName: row.guest_name,
+    note: row.dietary_restrictions,
+    createdAtISO: row.created_at_iso,
+    status: "pending" as const, // Default status
+  }))
+
+  const nextOffset = data.length < limit ? null : offset + limit
+  return { items: requests, nextOffset }
+}
+
+// CREATE operations
+export async function createHost(host: Host): Promise<void> {
+  const supabase = createClient()
+  // Profile image is stored as first item in images array
+  const { error } = await supabase.from("hosts").insert({
+    id: host.id,
+    name: host.name,
+    location: host.location,
+    space_type: host.spaceTitle,
+    capacity: host.capacity,
+    amenities: [], // Not in current Host type
+    description: host.spaceDesc,
+    images: host.profileImage ? [host.profileImage, ...host.photos] : host.photos,
+  })
+
+  if (error) {
+    console.error("[v0] Error creating host:", error)
+    throw error
+  }
+}
+
+export async function createCook(cook: Cook): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from("cooks").insert({
+    id: cook.id,
+    name: cook.name,
+    origin_country: cook.originCountry,
+    specialties: cook.specialties,
+    story: cook.story,
+    profile_picture: cook.profileImage,
+    cuisine_images: cook.cuisineImages,
+  })
+
+  if (error) {
+    console.error("[v0] Error creating cook:", error)
+    throw error
+  }
 }
 
 export async function createEvent(event: Event): Promise<void> {
@@ -130,55 +239,14 @@ export async function createEvent(event: Event): Promise<void> {
   }
 }
 
-export async function updateEvent(eventId: string, updates: Partial<Event>): Promise<void> {
-  const supabase = createClient()
-  const dbUpdates: Record<string, any> = {}
-
-  if (updates.cookId !== undefined) dbUpdates.cook_id = updates.cookId
-  if (updates.seatsLeft !== undefined) dbUpdates.seats_left = updates.seatsLeft
-
-  const { error } = await supabase.from("events").update(dbUpdates).eq("id", eventId)
-
-  if (error) {
-    console.error("[v0] Error updating event:", error)
-    throw error
-  }
-}
-
-// Collaboration Requests
-export async function getAllCollaborationRequests(): Promise<CollaborationRequest[]> {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from("collaboration_requests")
-    .select("*")
-    .order("created_at", { ascending: false })
-
-  if (error) {
-    console.error("[v0] Error fetching collaboration requests:", error)
-    return []
-  }
-
-  return (data || []).map((row) => ({
-    id: row.id,
-    fromCookId: row.from_cook_id,
-    toHostId: row.to_host_id,
-    eventId: row.event_id,
-    message: row.message,
-    proposedDishes: row.proposed_dishes || [],
-    status: row.status as "pending" | "accepted" | "declined",
-    createdAtISO: row.created_at_iso,
-  }))
-}
-
 export async function createCollaborationRequest(request: CollaborationRequest): Promise<void> {
   const supabase = createClient()
   const { error } = await supabase.from("collaboration_requests").insert({
     id: request.id,
-    from_cook_id: request.fromCookId,
-    to_host_id: request.toHostId,
+    cook_id: request.fromCookId,
+    host_id: request.toHostId,
     event_id: request.eventId,
     message: request.message,
-    proposed_dishes: request.proposedDishes,
     status: request.status,
     created_at_iso: request.createdAtISO,
   })
@@ -189,7 +257,46 @@ export async function createCollaborationRequest(request: CollaborationRequest):
   }
 }
 
-export async function updateCollaborationRequest(
+export async function createSeatRequest(request: SeatRequest): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from("seat_requests").insert({
+    id: request.id,
+    event_id: request.eventId,
+    guest_name: request.guestName,
+    guest_email: "", // Required field, using empty string as default
+    seats_requested: 1, // Default to 1 seat
+    dietary_restrictions: request.note,
+    created_at_iso: request.createdAtISO,
+  })
+
+  if (error) {
+    console.error("[v0] Error creating seat request:", error)
+    throw error
+  }
+}
+
+// UPDATE operations
+export async function updateEventSeatsLeft(eventId: string, seatsLeft: number): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from("events").update({ seats_left: seatsLeft }).eq("id", eventId)
+
+  if (error) {
+    console.error("[v0] Error updating event seats:", error)
+    throw error
+  }
+}
+
+export async function updateEventCook(eventId: string, cookId: string | null): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from("events").update({ cook_id: cookId }).eq("id", eventId)
+
+  if (error) {
+    console.error("[v0] Error updating event cook:", error)
+    throw error
+  }
+}
+
+export async function updateCollaborationRequestStatus(
   requestId: string,
   status: "pending" | "accepted" | "declined",
 ): Promise<void> {
@@ -202,39 +309,15 @@ export async function updateCollaborationRequest(
   }
 }
 
-// Seat Requests
-export async function getAllSeatRequests(): Promise<SeatRequest[]> {
+export async function updateSeatRequestStatus(
+  requestId: string,
+  status: "pending" | "approved" | "declined" | "waitlist",
+): Promise<void> {
   const supabase = createClient()
-  const { data, error } = await supabase.from("seat_requests").select("*").order("created_at", { ascending: false })
+  const { error } = await supabase.from("seat_requests").update({ status }).eq("id", requestId)
 
   if (error) {
-    console.error("[v0] Error fetching seat requests:", error)
-    return []
-  }
-
-  return (data || []).map((row) => ({
-    id: row.id,
-    eventId: row.event_id,
-    guestName: row.guest_name,
-    note: row.note,
-    status: row.status as "pending" | "approved" | "waitlist" | "declined",
-    createdAtISO: row.created_at_iso,
-  }))
-}
-
-export async function createSeatRequest(request: SeatRequest): Promise<void> {
-  const supabase = createClient()
-  const { error } = await supabase.from("seat_requests").insert({
-    id: request.id,
-    event_id: request.eventId,
-    guest_name: request.guestName,
-    note: request.note,
-    status: request.status,
-    created_at_iso: request.createdAtISO,
-  })
-
-  if (error) {
-    console.error("[v0] Error creating seat request:", error)
+    console.error("[v0] Error updating seat request:", error)
     throw error
   }
 }

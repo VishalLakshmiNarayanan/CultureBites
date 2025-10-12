@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ImageUpload } from "@/components/image-upload"
 import { X, Upload, User, AlertCircle } from "lucide-react"
-import { getAppData, saveAppData } from "@/lib/local-storage"
+import { addCook } from "@/lib/local-storage"
 import { useToast } from "@/hooks/use-toast"
 import type { Cook } from "@/lib/types"
 
@@ -44,7 +44,7 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
     setSpecialties(specialties.filter((s) => s !== specialty))
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log("[v0] Cook profile submit - name:", name, "country:", originCountry, "specialties:", specialties)
 
     const newErrors: { [key: string]: boolean } = {}
@@ -92,31 +92,33 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
 
     console.log("[v0] Creating cook profile:", newCook)
 
-    const data = getAppData()
-    console.log("[v0] Current cooks count:", data.cooks.length)
-    saveAppData({
-      ...data,
-      cooks: [...data.cooks, newCook],
-    })
-    console.log("[v0] Cook profile saved successfully. New cooks count:", data.cooks.length + 1)
+    try {
+      await addCook(newCook)
 
-    toast({
-      title: "Profile created!",
-      description: "Your cook profile has been created successfully.",
-    })
+      toast({
+        title: "Profile created!",
+        description: "Your cook profile has been created successfully.",
+      })
 
-    // Reset form
-    setName("")
-    setOriginCountry("")
-    setStory("")
-    setSpecialties([])
-    setProfileImage("")
-    setCuisineImages([])
-    setSpecialtyInput("")
-    setErrors({})
+      // Reset form
+      setName("")
+      setOriginCountry("")
+      setStory("")
+      setSpecialties([])
+      setProfileImage("")
+      setCuisineImages([])
+      setSpecialtyInput("")
+      setErrors({})
 
-    onSuccess()
-    onOpenChange(false)
+      onSuccess()
+      onOpenChange(false)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create cook profile. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

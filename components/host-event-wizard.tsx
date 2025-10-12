@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ImageUpload } from "@/components/image-upload"
 import { useToast } from "@/hooks/use-toast"
-import { getAppData, saveAppData } from "@/lib/local-storage"
+import { addEvent } from "@/lib/local-storage"
 import type { Event } from "@/lib/types"
 
 interface HostEventWizardProps {
@@ -76,9 +76,7 @@ export function HostEventWizard({ open, onOpenChange, hostId, onSuccess }: HostE
     if (step > 1) setStep(step - 1)
   }
 
-  const handlePublish = () => {
-    const data = getAppData()
-
+  const handlePublish = async () => {
     const newEvent: Event = {
       id: `event-${Date.now()}`,
       title,
@@ -88,7 +86,7 @@ export function HostEventWizard({ open, onOpenChange, hostId, onSuccess }: HostE
       startTime,
       endTime,
       location,
-      images, // Using actual uploaded images
+      images,
       seatsTotal: Number.parseInt(seatsTotal),
       seatsLeft: Number.parseInt(seatsTotal),
     }
@@ -96,26 +94,24 @@ export function HostEventWizard({ open, onOpenChange, hostId, onSuccess }: HostE
     console.log("[v0] Creating event with hostId:", hostId)
     console.log("[v0] New event object:", newEvent)
 
-    saveAppData({
-      ...data,
-      events: [...data.events, newEvent],
-    })
+    try {
+      await addEvent(newEvent)
 
-    const updatedData = getAppData()
-    console.log("[v0] Event saved. Total events now:", updatedData.events.length)
-    console.log(
-      "[v0] All event hostIds:",
-      updatedData.events.map((e) => ({ id: e.id, hostId: e.hostId })),
-    )
+      toast({
+        title: "Event published!",
+        description: `"${title}" has been created successfully.`,
+      })
 
-    toast({
-      title: "Event published!",
-      description: `"${title}" has been created successfully.`,
-    })
-
-    resetForm()
-    onOpenChange(false)
-    onSuccess()
+      resetForm()
+      onOpenChange(false)
+      onSuccess()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create event. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const progress = (step / 3) * 100

@@ -10,9 +10,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ImageUpload } from "@/components/image-upload"
 import { Upload, User } from "lucide-react"
-import { getAppData, saveAppData } from "@/lib/local-storage"
 import { useToast } from "@/hooks/use-toast"
 import type { Host } from "@/lib/types"
+import { addHost } from "@/lib/local-storage"
 
 interface HostProfileWizardProps {
   open: boolean
@@ -30,7 +30,7 @@ export function HostProfileWizard({ open, onOpenChange, onSuccess }: HostProfile
   const [photos, setPhotos] = useState<string[]>([])
   const { toast } = useToast()
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log("[v0] Host profile submit - name:", name, "space:", spaceTitle, "location:", location)
 
     if (!name.trim() || !spaceTitle.trim() || !spaceDesc.trim() || !location.trim()) {
@@ -59,27 +59,31 @@ export function HostProfileWizard({ open, onOpenChange, onSuccess }: HostProfile
 
     console.log("[v0] Creating host profile:", newHost)
 
-    const data = getAppData()
-    saveAppData({
-      ...data,
-      hosts: [...data.hosts, newHost],
-    })
+    try {
+      await addHost(newHost)
 
-    toast({
-      title: "Profile created!",
-      description: "Your host profile has been created successfully.",
-    })
+      toast({
+        title: "Profile created!",
+        description: "Your host profile has been created successfully.",
+      })
 
-    setName("")
-    setSpaceTitle("")
-    setSpaceDesc("")
-    setLocation("")
-    setCapacity("6")
-    setProfileImage("")
-    setPhotos([])
+      setName("")
+      setSpaceTitle("")
+      setSpaceDesc("")
+      setLocation("")
+      setCapacity("6")
+      setProfileImage("")
+      setPhotos([])
 
-    onSuccess()
-    onOpenChange(false)
+      onSuccess()
+      onOpenChange(false)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create host profile. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

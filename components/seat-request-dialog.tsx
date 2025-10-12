@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { getAppData, saveAppData } from "@/lib/local-storage"
+import { getAppData, addSeatRequest, updateEventSeats } from "@/lib/local-storage"
 import type { Event, SeatRequest } from "@/lib/types"
 
 interface SeatRequestDialogProps {
@@ -21,9 +21,10 @@ interface SeatRequestDialogProps {
 export function SeatRequestDialog({ open, onOpenChange, event }: SeatRequestDialogProps) {
   const [guestName, setGuestName] = useState("")
   const [note, setNote] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!guestName.trim()) {
@@ -35,37 +36,58 @@ export function SeatRequestDialog({ open, onOpenChange, event }: SeatRequestDial
       return
     }
 
-    const data = getAppData()
+    if (isSubmitting) return
+    setIsSubmitting(true)
 
-    // Create seat request
-    const newRequest: SeatRequest = {
-      id: `seat-${Date.now()}`,
-      eventId: event.id,
-      guestName: guestName.trim(),
-      note: note.trim() || undefined,
-      createdAtISO: new Date().toISOString(),
-      status: "pending",
+    try {
+      const data = await getAppData()
+      const currentEvent = data.events.find((e) => e.id === event.id)
+
+      if (!currentEvent) {
+        throw new Error("Event not found")
+      }
+
+      if (currentEvent.seatsLeft <= 0) {
+        toast({
+          title: "No seats available",
+          description: "This event is fully booked.",
+          variant: "destructive",
+        })
+        setIsSubmitting(false)
+        return
+      }
+
+      // Create seat request
+      const newRequest: SeatRequest = {
+        id: `seat-${Date.now()}`,
+        eventId: event.id,
+        guestName: guestName.trim(),
+        note: note.trim() || undefined,
+        createdAtISO: new Date().toISOString(),
+        status: "pending",
+      }
+
+      await addSeatRequest(newRequest)
+      await updateEventSeats(event.id, Math.max(0, currentEvent.seatsLeft - 1))
+
+      toast({
+        title: "Request sent!",
+        description: `Your seat request for "${event.title}" has been sent to the host.`,
+      })
+
+      setGuestName("")
+      setNote("")
+      onOpenChange(false)
+    } catch (error) {
+      console.error("[v0] Error submitting seat request:", error)
+      toast({
+        title: "Error",
+        description: "Failed to send seat request. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
     }
-
-    // Update event seats
-    const updatedEvents = data.events.map((e) =>
-      e.id === event.id ? { ...e, seatsLeft: Math.max(0, e.seatsLeft - 1) } : e,
-    )
-
-    saveAppData({
-      ...data,
-      events: updatedEvents,
-      seatRequests: [...data.seatRequests, newRequest],
-    })
-
-    toast({
-      title: "Request sent!",
-      description: `Your seat request for "${event.title}" has been sent to the host.`,
-    })
-
-    setGuestName("")
-    setNote("")
-    onOpenChange(false)
   }
 
   return (
@@ -99,7 +121,9 @@ export function SeatRequestDialog({ open, onOpenChange, event }: SeatRequestDial
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Send Request</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Sending..." : "Send Request"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
