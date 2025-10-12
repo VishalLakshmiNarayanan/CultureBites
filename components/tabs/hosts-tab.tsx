@@ -32,25 +32,25 @@ export function HostsTab() {
     refreshData()
   }, [])
 
-  const refreshData = () => {
-    const data = getAppData()
-    console.log("[v0] Refreshing host data. Total hosts:", data.hosts.length)
-    console.log("[v0] Total events:", data.events.length)
+  const refreshData = async () => {
+    const data = await getAppData()
+    console.log("[v0] Refreshing host data. Total hosts:", (data.hosts || []).length)
+    console.log("[v0] Total events:", (data.events || []).length)
     console.log(
       "[v0] All events:",
-      data.events.map((e) => ({ id: e.id, title: e.title, hostId: e.hostId })),
+      (data.events || []).map((e) => ({ id: e.id, title: e.title, hostId: e.hostId })),
     )
-    setMyHosts(data.hosts)
+    setMyHosts(data.hosts || [])
 
-    if (!selectedHostId && data.hosts.length > 0) {
+    if (!selectedHostId && data.hosts && data.hosts.length > 0) {
       setSelectedHostId(data.hosts[0].id)
     }
 
-    setCooks(data.cooks)
+    setCooks(data.cooks || [])
 
     if (selectedHostId) {
       console.log("[v0] Filtering events for hostId:", selectedHostId)
-      const hostEvents = data.events.filter((e) => e.hostId === selectedHostId)
+      const hostEvents = (data.events || []).filter((e) => e.hostId === selectedHostId)
       console.log("[v0] Events for host", selectedHostId, ":", hostEvents.length)
       console.log(
         "[v0] Filtered events:",
@@ -59,10 +59,10 @@ export function HostsTab() {
       setMyEvents(hostEvents)
 
       const eventIds = hostEvents.map((e) => e.id)
-      const requests = data.seatRequests.filter((r) => eventIds.includes(r.eventId))
+      const requests = (data.seatRequests || []).filter((r) => eventIds.includes(r.eventId))
       setSeatRequests(requests)
 
-      const collabs = data.collaborationRequests.filter((r) => r.toHostId === selectedHostId)
+      const collabs = (data.collaborationRequests || []).filter((r) => r.toHostId === selectedHostId)
       setCollabRequests(collabs)
     }
   }
@@ -75,8 +75,8 @@ export function HostsTab() {
 
   const selectedHost = myHosts.find((h) => h.id === selectedHostId)
 
-  const handleAcceptCollaboration = (requestId: string) => {
-    const data = getAppData()
+  const handleAcceptCollaboration = async (requestId: string) => {
+    const data = await getAppData()
     const request = data.collaborationRequests.find((r) => r.id === requestId)
 
     const updatedRequests = data.collaborationRequests.map((r) =>
@@ -102,8 +102,8 @@ export function HostsTab() {
     refreshData()
   }
 
-  const handleDeclineCollaboration = (requestId: string) => {
-    const data = getAppData()
+  const handleDeclineCollaboration = async (requestId: string) => {
+    const data = await getAppData()
     const updatedRequests = data.collaborationRequests.map((r) =>
       r.id === requestId ? { ...r, status: "declined" as const } : r,
     )
@@ -121,8 +121,8 @@ export function HostsTab() {
     refreshData()
   }
 
-  const handleApproveSeat = (requestId: string) => {
-    const data = getAppData()
+  const handleApproveSeat = async (requestId: string) => {
+    const data = await getAppData()
     const updatedRequests = data.seatRequests.map((r) =>
       r.id === requestId ? { ...r, status: "approved" as const } : r,
     )
@@ -140,8 +140,8 @@ export function HostsTab() {
     refreshData()
   }
 
-  const handleWaitlistSeat = (requestId: string, eventId: string) => {
-    const data = getAppData()
+  const handleWaitlistSeat = async (requestId: string, eventId: string) => {
+    const data = await getAppData()
     const updatedRequests = data.seatRequests.map((r) =>
       r.id === requestId ? { ...r, status: "waitlist" as const } : r,
     )
@@ -162,8 +162,8 @@ export function HostsTab() {
     refreshData()
   }
 
-  const handleDeclineSeat = (requestId: string, eventId: string) => {
-    const data = getAppData()
+  const handleDeclineSeat = async (requestId: string, eventId: string) => {
+    const data = await getAppData()
     const updatedRequests = data.seatRequests.map((r) =>
       r.id === requestId ? { ...r, status: "declined" as const } : r,
     )
@@ -396,7 +396,7 @@ export function HostsTab() {
                   <p className="text-center text-gray-600 py-8">No collaboration requests</p>
                 ) : (
                   collabRequests.map((request) => {
-                    const cook = getAppData().cooks.find((c) => c.id === request.fromCookId)
+                    const cook = cooks.find((c) => c.id === request.fromCookId)
                     const event = request.eventId ? myEvents.find((e) => e.id === request.eventId) : null
                     return (
                       <div key={request.id} className="p-4 border-2 border-orange-200 rounded-lg space-y-3 bg-white/60">

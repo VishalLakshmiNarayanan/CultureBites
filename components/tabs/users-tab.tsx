@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { FlipCuisineCard } from "@/components/flip-cuisine-card"
 import { GlassCard } from "@/components/glass-card"
-import { Search, Shuffle } from "lucide-react"
+import { Search, Shuffle, Calendar } from "lucide-react"
 import { getAppData } from "@/lib/local-storage"
 import type { Event, Cook, Host } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -16,40 +16,48 @@ const CUISINE_TAGS = ["Mexican", "Japanese", "Lebanese", "Italian", "Indian", "F
 export function UsersTab() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedDate, setSelectedDate] = useState<string>("")
   const [events, setEvents] = useState<Event[]>([])
   const [cooks, setCooks] = useState<Cook[]>([])
   const [hosts, setHosts] = useState<Host[]>([])
   const [savedEventIds, setSavedEventIds] = useState<string[]>([])
   const [surpriseEventId, setSurpriseEventId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const data = getAppData()
-    console.log("[v0] Loading events. Total events:", data.events.length)
-    console.log("[v0] Total collaboration requests:", data.collaborationRequests.length)
+    async function loadData() {
+      setLoading(true)
+      const data = await getAppData()
+      console.log("[v0] Loading events. Total events:", data.events?.length || 0)
+      console.log("[v0] Total collaboration requests:", data.collaborationRequests?.length || 0)
 
-    const eventsWithCooks = data.events.filter((event) => {
-      if (!event.cookId) {
-        console.log("[v0] Event", event.id, "has no cook assigned")
-        return false
+      const eventsWithCooks = (data.events || []).filter((event) => {
+        if (!event.cookId) {
+          console.log("[v0] Event", event.id, "has no cook assigned")
+          return false
+        }
+        const hasAcceptedCollab = (data.collaborationRequests || []).some(
+          (req) => req.toHostId === event.hostId && req.fromCookId === event.cookId && req.status === "accepted",
+        )
+        if (!hasAcceptedCollab) {
+          console.log("[v0] Event", event.id, "has no accepted collaboration")
+        }
+        return hasAcceptedCollab
+      })
+
+      console.log("[v0] Events with accepted collaborations:", eventsWithCooks.length)
+      setEvents(eventsWithCooks)
+      setCooks(data.cooks || [])
+      setHosts(data.hosts || [])
+      setLoading(false)
+
+      const saved = localStorage.getItem("saved-events")
+      if (saved) {
+        setSavedEventIds(JSON.parse(saved))
       }
-      const hasAcceptedCollab = data.collaborationRequests.some(
-        (req) => req.toHostId === event.hostId && req.fromCookId === event.cookId && req.status === "accepted",
-      )
-      if (!hasAcceptedCollab) {
-        console.log("[v0] Event", event.id, "has no accepted collaboration")
-      }
-      return hasAcceptedCollab
-    })
-
-    console.log("[v0] Events with accepted collaborations:", eventsWithCooks.length)
-    setEvents(eventsWithCooks)
-    setCooks(data.cooks)
-    setHosts(data.hosts)
-
-    const saved = localStorage.getItem("saved-events")
-    if (saved) {
-      setSavedEventIds(JSON.parse(saved))
     }
+
+    loadData()
   }, [])
 
   const filteredEvents = events.filter((event) => {
@@ -61,7 +69,9 @@ export function UsersTab() {
 
     const matchesTags = selectedTags.length === 0 || selectedTags.includes(event.cuisine)
 
-    return matchesSearch && matchesTags
+    const matchesDate = selectedDate === "" || event.dateISO === selectedDate
+
+    return matchesSearch && matchesTags && matchesDate
   })
 
   const toggleTag = (tag: string) => {
@@ -80,7 +90,6 @@ export function UsersTab() {
     if (filteredEvents.length === 0) return
     const randomEvent = filteredEvents[Math.floor(Math.random() * filteredEvents.length)]
     setSurpriseEventId(randomEvent.id)
-    // Scroll to the event
     setTimeout(() => {
       const element = document.getElementById(`event-${randomEvent.id}`)
       element?.scrollIntoView({ behavior: "smooth", block: "center" })
@@ -94,6 +103,16 @@ export function UsersTab() {
     if (!cookId) return "/diverse-food-spread.png"
     const cook = cooks.find((c) => c.id === cookId)
     return cook?.cuisineImages?.[0] || "/diverse-food-spread.png"
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <GlassCard className="p-12 text-center">
+          <p className="text-orange-200 text-lg">Loading events...</p>
+        </GlassCard>
+      </div>
+    )
   }
 
   if (events.length === 0 && cooks.length === 0 && hosts.length === 0) {
@@ -122,6 +141,24 @@ export function UsersTab() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-white/60 border-orange-300 text-gray-800 placeholder:text-gray-500 focus:border-orange-500"
             />
+          </div>
+
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-500" />
+            <Input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="pl-10 bg-white/60 border-orange-300 text-gray-800 focus:border-orange-500"
+            />
+            {selectedDate && (
+              <button
+                onClick={() => setSelectedDate("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 hover:text-orange-700"
+              >
+                Clear
+              </button>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -156,7 +193,7 @@ export function UsersTab() {
       {/* Event Grid */}
       {filteredEvents.length === 0 ? (
         <GlassCard className="p-12 text-center">
-          <p className="text-gray-700">No events available yet. Check back soon!</p>
+          <p className="text-gray-700">No events match your filters. Try adjusting your search!</p>
         </GlassCard>
       ) : (
         <div>

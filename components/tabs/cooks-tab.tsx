@@ -32,19 +32,19 @@ export function CooksTab() {
     refreshData()
   }, [])
 
-  const refreshData = () => {
-    const data = getAppData()
-    setMyCooks(data.cooks)
+  const refreshData = async () => {
+    const data = await getAppData()
+    setMyCooks(data.cooks || [])
 
-    if (!selectedCookId && data.cooks.length > 0) {
+    if (!selectedCookId && data.cooks && data.cooks.length > 0) {
       setSelectedCookId(data.cooks[0].id)
     }
 
-    setHosts(data.hosts)
-    setEvents(data.events)
+    setHosts(data.hosts || [])
+    setEvents(data.events || [])
 
     if (selectedCookId) {
-      const requests = data.collaborationRequests.filter((r) => r.fromCookId === selectedCookId)
+      const requests = (data.collaborationRequests || []).filter((r) => r.fromCookId === selectedCookId)
       setMyRequests(requests)
     }
   }
@@ -57,7 +57,7 @@ export function CooksTab() {
 
   const selectedCook = myCooks.find((c) => c.id === selectedCookId)
 
-  const filteredHosts = hosts.filter((host) => {
+  const filteredHosts = (hosts || []).filter((host) => {
     const matchesSearch =
       searchQuery === "" ||
       host.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
