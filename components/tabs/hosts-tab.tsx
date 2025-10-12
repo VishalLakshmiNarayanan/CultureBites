@@ -232,7 +232,14 @@ export function HostsTab() {
           </Button>
         </GlassCard>
 
-        <HostProfileWizard open={showProfileWizard} onOpenChange={setShowProfileWizard} onSuccess={refreshData} />
+        <HostProfileWizard
+          open={showProfileWizard}
+          onOpenChange={setShowProfileWizard}
+          onSuccess={() => {
+            setShowProfileWizard(false)
+            refreshData()
+          }}
+        />
       </div>
     )
   }
@@ -547,7 +554,14 @@ export function HostsTab() {
         </>
       )}
 
-      <HostProfileWizard open={showProfileWizard} onOpenChange={setShowProfileWizard} onSuccess={refreshData} />
+      <HostProfileWizard
+        open={showProfileWizard}
+        onOpenChange={setShowProfileWizard}
+        onSuccess={() => {
+          setShowProfileWizard(false)
+          refreshData()
+        }}
+      />
     </div>
   )
 }
