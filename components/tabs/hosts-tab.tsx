@@ -34,6 +34,12 @@ export function HostsTab() {
 
   const refreshData = () => {
     const data = getAppData()
+    console.log("[v0] Refreshing host data. Total hosts:", data.hosts.length)
+    console.log("[v0] Total events:", data.events.length)
+    console.log(
+      "[v0] All events:",
+      data.events.map((e) => ({ id: e.id, title: e.title, hostId: e.hostId })),
+    )
     setMyHosts(data.hosts)
 
     if (!selectedHostId && data.hosts.length > 0) {
@@ -43,7 +49,13 @@ export function HostsTab() {
     setCooks(data.cooks)
 
     if (selectedHostId) {
+      console.log("[v0] Filtering events for hostId:", selectedHostId)
       const hostEvents = data.events.filter((e) => e.hostId === selectedHostId)
+      console.log("[v0] Events for host", selectedHostId, ":", hostEvents.length)
+      console.log(
+        "[v0] Filtered events:",
+        hostEvents.map((e) => ({ id: e.id, title: e.title })),
+      )
       setMyEvents(hostEvents)
 
       const eventIds = hostEvents.map((e) => e.id)

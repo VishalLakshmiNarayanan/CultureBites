@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,6 +37,12 @@ export function HostEventWizard({ open, onOpenChange, hostId, onSuccess }: HostE
 
   // Step 2: Media
   const [images, setImages] = useState<string[]>([])
+
+  useEffect(() => {
+    if (open) {
+      console.log("[v0] HostEventWizard opened with hostId:", hostId)
+    }
+  }, [open, hostId])
 
   const resetForm = () => {
     setStep(1)
@@ -87,10 +93,20 @@ export function HostEventWizard({ open, onOpenChange, hostId, onSuccess }: HostE
       seatsLeft: Number.parseInt(seatsTotal),
     }
 
+    console.log("[v0] Creating event with hostId:", hostId)
+    console.log("[v0] New event object:", newEvent)
+
     saveAppData({
       ...data,
       events: [...data.events, newEvent],
     })
+
+    const updatedData = getAppData()
+    console.log("[v0] Event saved. Total events now:", updatedData.events.length)
+    console.log(
+      "[v0] All event hostIds:",
+      updatedData.events.map((e) => ({ id: e.id, hostId: e.hostId })),
+    )
 
     toast({
       title: "Event published!",

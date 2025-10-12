@@ -24,13 +24,24 @@ export function UsersTab() {
 
   useEffect(() => {
     const data = getAppData()
+    console.log("[v0] Loading events. Total events:", data.events.length)
+    console.log("[v0] Total collaboration requests:", data.collaborationRequests.length)
+
     const eventsWithCooks = data.events.filter((event) => {
-      if (!event.cookId) return false
+      if (!event.cookId) {
+        console.log("[v0] Event", event.id, "has no cook assigned")
+        return false
+      }
       const hasAcceptedCollab = data.collaborationRequests.some(
         (req) => req.toHostId === event.hostId && req.fromCookId === event.cookId && req.status === "accepted",
       )
+      if (!hasAcceptedCollab) {
+        console.log("[v0] Event", event.id, "has no accepted collaboration")
+      }
       return hasAcceptedCollab
     })
+
+    console.log("[v0] Events with accepted collaborations:", eventsWithCooks.length)
     setEvents(eventsWithCooks)
     setCooks(data.cooks)
     setHosts(data.hosts)

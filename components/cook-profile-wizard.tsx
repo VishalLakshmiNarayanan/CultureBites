@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ImageUpload } from "@/components/image-upload"
-import { X, Upload, User } from "lucide-react"
+import { X, Upload, User, AlertCircle } from "lucide-react"
 import { getAppData, saveAppData } from "@/lib/local-storage"
 import { useToast } from "@/hooks/use-toast"
 import type { Cook } from "@/lib/types"
@@ -69,6 +69,7 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
 
     if (missingFields.length > 0) {
       setErrors(newErrors)
+      console.log("[v0] Validation failed. Missing fields:", missingFields)
       toast({
         title: "Missing Required Fields",
         description: `Please fill in: ${missingFields.join(", ")}`,
@@ -92,10 +93,12 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
     console.log("[v0] Creating cook profile:", newCook)
 
     const data = getAppData()
+    console.log("[v0] Current cooks count:", data.cooks.length)
     saveAppData({
       ...data,
       cooks: [...data.cooks, newCook],
     })
+    console.log("[v0] Cook profile saved successfully. New cooks count:", data.cooks.length + 1)
 
     toast({
       title: "Profile created!",
@@ -227,7 +230,18 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
             <Label htmlFor="specialty">
               Cuisine Specialties <span className="text-destructive">*</span>
             </Label>
-            <p className="text-sm text-muted-foreground">Type a specialty and click "Add" to include it</p>
+            <div
+              className={`p-3 rounded-lg ${errors.specialties ? "bg-red-50 border-2 border-red-500" : "bg-orange-50 border border-orange-200"}`}
+            >
+              <div className="flex items-start gap-2 mb-2">
+                <AlertCircle className={`w-4 h-4 mt-0.5 ${errors.specialties ? "text-red-500" : "text-orange-500"}`} />
+                <p className={`text-sm font-medium ${errors.specialties ? "text-red-700" : "text-orange-700"}`}>
+                  {errors.specialties
+                    ? "⚠️ You must add at least one specialty before creating your profile!"
+                    : "Type a specialty and click 'Add' to include it (e.g., Pasta, Sushi, Tacos)"}
+                </p>
+              </div>
+            </div>
             <div className="flex gap-2">
               <Input
                 id="specialty"
@@ -237,14 +251,14 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
                 placeholder="e.g., Pasta, Sushi, Tacos"
                 className={errors.specialties && specialties.length === 0 ? "border-red-500 border-2" : ""}
               />
-              <Button type="button" onClick={handleAddSpecialty}>
+              <Button type="button" onClick={handleAddSpecialty} className="bg-orange-500 hover:bg-orange-600">
                 Add
               </Button>
             </div>
             {specialties.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {specialties.map((specialty) => (
-                  <Badge key={specialty} variant="secondary" className="gap-1">
+                  <Badge key={specialty} variant="secondary" className="gap-1 bg-orange-100 text-orange-700">
                     {specialty}
                     <X className="w-3 h-3 cursor-pointer" onClick={() => handleRemoveSpecialty(specialty)} />
                   </Badge>
@@ -280,7 +294,7 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
 
           {/* Submit */}
           <div className="flex gap-3">
-            <Button onClick={handleSubmit} className="flex-1">
+            <Button onClick={handleSubmit} className="flex-1 bg-orange-500 hover:bg-orange-600">
               Create Profile
             </Button>
             <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
