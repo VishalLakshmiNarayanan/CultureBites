@@ -9,7 +9,7 @@ export function TermsTab() {
         <div className="space-y-8 text-gray-900">
           {/* Header */}
           <div className="text-center space-y-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-black-400 to-grey-400">
               Terms and Conditions
             </h1>
           </div>

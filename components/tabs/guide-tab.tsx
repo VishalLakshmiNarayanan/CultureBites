@@ -8,13 +8,7 @@ export function GuideTab() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
-          How CultureBites Works
-        </h1>
-        <p className="text-lg text-white max-w-3xl mx-auto">
-          Welcome to CultureBites! Whether you're looking to experience authentic cuisines, share your culinary space,
-          or showcase your cooking talents, we've made it simple for everyone.
-        </p>
+        
       </div>
 
       {/* For Guests Section */}
