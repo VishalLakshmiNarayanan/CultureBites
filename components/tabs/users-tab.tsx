@@ -23,8 +23,6 @@ export function UsersTab() {
   const [savedEventIds, setSavedEventIds] = useState<string[]>([])
   const [surpriseEventId, setSurpriseEventId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [registeredEventIds, setRegisteredEventIds] = useState<string[]>([])
 
   useEffect(() => {
     async function loadData() {
@@ -51,24 +49,6 @@ export function UsersTab() {
       setEvents(eventsWithCooks)
       setCooks(data.cooks || [])
       setHosts(data.hosts || [])
-
-      const email = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("user_email="))
-        ?.split("=")[1]
-
-      if (email) {
-        setUserEmail(email)
-        console.log("[v0] Current user email:", email)
-
-        const userRegisteredEvents = (data.seatRequests || [])
-          .filter((req) => req.guestEmail === email)
-          .map((req) => req.eventId)
-
-        setRegisteredEventIds(userRegisteredEvents)
-        console.log("[v0] User already registered for events:", userRegisteredEvents)
-      }
-
       setLoading(false)
 
       const saved = localStorage.getItem("saved-events")
@@ -224,7 +204,6 @@ export function UsersTab() {
             {filteredEvents.map((event) => {
               const cuisineImage = getCookCuisineImage(event.cookId)
               const isHighlighted = surpriseEventId === event.id
-              const isAlreadyRegistered = registeredEventIds.includes(event.id)
 
               return (
                 <div
@@ -242,8 +221,6 @@ export function UsersTab() {
                     onSave={() => toggleSaveEvent(event.id)}
                     isSaved={savedEventIds.includes(event.id)}
                     cuisineImage={cuisineImage}
-                    isAlreadyRegistered={isAlreadyRegistered}
-                    userEmail={userEmail}
                   />
                 </div>
               )

@@ -5,15 +5,13 @@ const PAGE_SIZE = 24
 
 type Page<T> = { items: T[]; nextOffset: number | null }
 
-export async function listHosts(offset = 0, limit = PAGE_SIZE, userEmail?: string): Promise<Page<Host>> {
+export async function listHosts(offset = 0, limit = PAGE_SIZE): Promise<Page<Host>> {
   const supabase = createClient()
-  let query = supabase.from("hosts").select("*").order("created_at", { ascending: false })
-
-  if (userEmail) {
-    query = query.eq("user_email", userEmail)
-  }
-
-  const { data, error } = await query.range(offset, offset + limit - 1)
+  const { data, error } = await supabase
+    .from("hosts")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("[v0] Error fetching hosts:", error)
@@ -29,22 +27,19 @@ export async function listHosts(offset = 0, limit = PAGE_SIZE, userEmail?: strin
     location: row.location,
     capacity: row.capacity,
     photos: row.images?.slice(1) || [], // Rest of images are photos
-    userEmail: row.user_email,
   }))
 
   const nextOffset = data.length < limit ? null : offset + limit
   return { items: hosts, nextOffset }
 }
 
-export async function listCooks(offset = 0, limit = PAGE_SIZE, userEmail?: string): Promise<Page<Cook>> {
+export async function listCooks(offset = 0, limit = PAGE_SIZE): Promise<Page<Cook>> {
   const supabase = createClient()
-  let query = supabase.from("cooks").select("*").order("created_at", { ascending: false })
-
-  if (userEmail) {
-    query = query.eq("user_email", userEmail)
-  }
-
-  const { data, error } = await query.range(offset, offset + limit - 1)
+  const { data, error } = await supabase
+    .from("cooks")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("[v0] Error fetching cooks:", error)
@@ -59,7 +54,6 @@ export async function listCooks(offset = 0, limit = PAGE_SIZE, userEmail?: strin
     specialties: row.specialties || [],
     story: row.story,
     cuisineImages: row.cuisine_images || [],
-    userEmail: row.user_email,
   }))
 
   const nextOffset = data.length < limit ? null : offset + limit
@@ -196,7 +190,7 @@ export async function createHost(host: Host, userEmail?: string): Promise<void> 
     amenities: [], // Not in current Host type
     description: host.spaceDesc,
     images: host.profileImage ? [host.profileImage, ...host.photos] : host.photos,
-    user_email: userEmail, // Link to logged-in user
+    user_email: userEmail || host.userEmail,
   })
 
   if (error) {
@@ -215,7 +209,7 @@ export async function createCook(cook: Cook, userEmail?: string): Promise<void> 
     story: cook.story,
     profile_picture: cook.profileImage,
     cuisine_images: cook.cuisineImages,
-    user_email: userEmail, // Link to logged-in user
+    user_email: userEmail || cook.userEmail,
   })
 
   if (error) {
@@ -328,4 +322,64 @@ export async function updateSeatRequestStatus(
     console.error("[v0] Error updating seat request:", error)
     throw error
   }
+}
+
+// Fetch hosts and cooks by user email
+export async function listHostsByUserEmail(userEmail: string, offset = 0, limit = PAGE_SIZE): Promise<Page<Host>> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("hosts")
+    .select("*")
+    .eq("user_email", userEmail)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    console.error("[v0] Error fetching hosts by user email:", error)
+    return { items: [], nextOffset: null }
+  }
+
+  const hosts = (data || []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    profileImage: row.images?.[0] || "",
+    spaceTitle: row.space_type,
+    spaceDesc: row.description,
+    location: row.location,
+    capacity: row.capacity,
+    photos: row.images?.slice(1) || [],
+    userEmail: row.user_email,
+  }))
+
+  const nextOffset = data.length < limit ? null : offset + limit
+  return { items: hosts, nextOffset }
+}
+
+export async function listCooksByUserEmail(userEmail: string, offset = 0, limit = PAGE_SIZE): Promise<Page<Cook>> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("cooks")
+    .select("*")
+    .eq("user_email", userEmail)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    console.error("[v0] Error fetching cooks by user email:", error)
+    return { items: [], nextOffset: null }
+  }
+
+  const cooks = (data || []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    profileImage: row.profile_picture,
+    originCountry: row.origin_country,
+    specialties: row.specialties || [],
+    story: row.story,
+    cuisineImages: row.cuisine_images || [],
+    userEmail: row.user_email,
+  }))
+
+  const nextOffset = data.length < limit ? null : offset + limit
+  return { items: cooks, nextOffset }
 }

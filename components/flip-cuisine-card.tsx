@@ -15,20 +15,9 @@ interface FlipCuisineCardProps {
   onSave: () => void
   isSaved: boolean
   cuisineImage?: string
-  isAlreadyRegistered?: boolean
-  userEmail?: string | null
 }
 
-export function FlipCuisineCard({
-  event,
-  host,
-  cook,
-  onSave,
-  isSaved,
-  cuisineImage,
-  isAlreadyRegistered = false,
-  userEmail,
-}: FlipCuisineCardProps) {
+export function FlipCuisineCard({ event, host, cook, onSave, isSaved, cuisineImage }: FlipCuisineCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
   const [showGallery, setShowGallery] = useState(false)
   const [showSeatRequest, setShowSeatRequest] = useState(false)
@@ -42,16 +31,6 @@ export function FlipCuisineCard({
         <div className="flip-card" onClick={() => setIsFlipped(!isFlipped)}>
           <div className="card-front">
             <img src={frontImage || "/placeholder.svg"} alt={event.title} className="w-full h-full object-cover" />
-            {isAlreadyRegistered && (
-              <div className="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-10">
-                <div className="text-center">
-                  <div className="text-4xl mb-2">✓</div>
-                  <p className="text-white text-xl font-bold">Already Registered</p>
-                  <p className="text-white/70 text-sm mt-1">You've requested seats for this event</p>
-                </div>
-              </div>
-            )}
-            {/* */}
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent flex flex-col justify-end p-8 text-white">
               <Badge className="mb-4 text-lg px-4 py-2 w-fit bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 border-0">
                 {event.cuisine}
@@ -63,16 +42,6 @@ export function FlipCuisineCard({
           </div>
 
           <div className="card-back">
-            {isAlreadyRegistered && (
-              <div className="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-20 rounded-3xl">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">✓</div>
-                  <p className="text-white text-2xl font-bold">Already Registered</p>
-                  <p className="text-white/70 text-base mt-2">You've requested seats for this event</p>
-                </div>
-              </div>
-            )}
-            {/* */}
             <div className="w-full h-full p-4 md:p-6 flex flex-col overflow-y-auto text-gray-800">
               {/* Profile Pictures Section */}
               <div className="flex items-center justify-center gap-4 md:gap-8 mb-4 md:mb-6">
@@ -190,12 +159,10 @@ export function FlipCuisineCard({
                     e.stopPropagation()
                     setShowSeatRequest(true)
                   }}
-                  disabled={event.seatsLeft === 0 || isAlreadyRegistered}
-                  //
+                  disabled={event.seatsLeft === 0}
                   className="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs md:text-sm"
                 >
-                  {isAlreadyRegistered ? "Already Registered" : "Request Seat"}
-                  {/* */}
+                  Request Seat
                 </Button>
                 <Button
                   variant="ghost"

@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState } from "react"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -12,97 +11,23 @@ import { UsersTab } from "@/components/tabs/users-tab"
 import { HostsTab } from "@/components/tabs/hosts-tab"
 import { CooksTab } from "@/components/tabs/cooks-tab"
 import { GuideTab } from "@/components/tabs/guide-tab"
-import { logoutUser } from "@/app/auth/actions"
-
-function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null
-  const value = `; ${document.cookie}`
-  const parts = value.split(`; ${name}=`)
-  if (parts.length === 2) return parts.pop()?.split(";").shift() || null
-  return null
-}
 
 export default function HomePage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState("mission")
   const [menuOpen, setMenuOpen] = useState(false)
-  const [user, setUser] = useState<{ email: string; role: string; displayName: string } | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    console.log("[v0] Checking authentication")
-    const email = getCookie("user_email")
-    const role = getCookie("user_role")
-    const displayName = getCookie("user_name")
-
-    console.log("[v0] Cookies found:", { email, role, displayName })
-
-    if (email) {
-      const currentUser = {
-        email,
-        role: role || "",
-        displayName: displayName || email,
-      }
-      console.log("[v0] Current user:", currentUser)
-      setUser(currentUser)
-    } else {
-      console.log("[v0] No user found")
-      setUser(null)
-    }
-
-    setLoading(false)
-  }, [])
-
-  useEffect(() => {
-    // Check if there's a tab parameter in the URL
-    const tab = searchParams.get("tab")
-    if (tab) {
-      console.log("[v0] Setting active tab from URL:", tab)
-      setActiveTab(tab)
-    }
-  }, [searchParams])
 
   const navItems = [
-    { value: "mission", label: "Mission", requiresAuth: false },
-    { value: "terms", label: "Terms", requiresAuth: false },
-    { value: "users", label: "Guests", requiresAuth: false },
-    { value: "hosts", label: "Hosts", requiresAuth: true, role: "host" },
-    { value: "cooks", label: "Cooks", requiresAuth: true, role: "cook" },
-    { value: "guide", label: "How It Works", requiresAuth: false },
+    { value: "mission", label: "Mission" },
+    { value: "terms", label: "Terms" },
+    { value: "users", label: "Guests" },
+    { value: "hosts", label: "Hosts" },
+    { value: "cooks", label: "Cooks" },
+    { value: "guide", label: "How It Works" },
   ]
 
-  const handleNavClick = async (value: string) => {
-    const navItem = navItems.find((item) => item.value === value)
-
-    if (navItem?.requiresAuth && !user) {
-      // Redirect to auth selection page
-      console.log("[v0] User not authenticated, redirecting to auth")
-      router.push(`/auth/select?role=${navItem.role}`)
-      setMenuOpen(false)
-      return
-    }
-
-    // If switching to a public tab (non-role tab) and user is logged in, log them out
-    if (!navItem?.requiresAuth && user && value !== "users") {
-      console.log("[v0] Logging out user when switching to public tab:", value)
-      await logoutUser()
-      setUser(null)
-    }
-
-    console.log("[v0] Navigating to tab:", value)
+  const handleNavClick = (value: string) => {
     setActiveTab(value)
-    // Update URL to reflect the new tab
-    router.push(`/?tab=${value}`)
     setMenuOpen(false)
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen w-full bg-black flex items-center justify-center">
-        <div className="text-orange-400 text-xl">Loading...</div>
-      </div>
-    )
   }
 
   return (
@@ -161,19 +86,11 @@ export default function HomePage() {
                     }`}
                   >
                     {item.label}
-                    {item.requiresAuth && !user && <span className="ml-auto text-xs">🔒</span>}
                   </Button>
                 ))}
               </div>
             </SheetContent>
           </Sheet>
-
-          {user && (
-            <div className="absolute left-12 sm:left-14 top-0 flex flex-row items-center gap-1">
-              <span className="text-orange-300 text-xs sm:text-sm font-medium">Hello,</span>
-              <span className="text-orange-400 text-sm sm:text-base font-bold">{user.displayName}</span>
-            </div>
-          )}
 
           <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3">
             <img
@@ -191,7 +108,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={handleNavClick} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsContent value="mission">
             <MissionTab />
           </TabsContent>
@@ -204,9 +121,13 @@ export default function HomePage() {
             <UsersTab />
           </TabsContent>
 
-          <TabsContent value="hosts">{user ? <HostsTab /> : null}</TabsContent>
+          <TabsContent value="hosts">
+            <HostsTab />
+          </TabsContent>
 
-          <TabsContent value="cooks">{user ? <CooksTab /> : null}</TabsContent>
+          <TabsContent value="cooks">
+            <CooksTab />
+          </TabsContent>
 
           <TabsContent value="guide">
             <GuideTab />

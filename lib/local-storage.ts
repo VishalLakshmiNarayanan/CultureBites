@@ -14,6 +14,8 @@ import {
   updateEventCook,
   updateCollaborationRequestStatus,
   updateSeatRequestStatus as updateSeatRequestStatusFunc,
+  listHostsByUserEmail,
+  listCooksByUserEmail,
 } from "@/lib/supabase/database"
 import type { Host, Cook, Event, CollaborationRequest, SeatRequest } from "@/lib/types"
 
@@ -30,21 +32,34 @@ export async function getAppData(): Promise<AppData> {
   try {
     console.log("[v0] Fetching data from Supabase...")
 
-    // Fetch all data from Supabase in parallel
-    const [hostsPage, cooksPage, eventsPage, collaborationRequestsPage, seatRequestsPage] = await Promise.all([
-      listHosts(0, 1000), // Fetch up to 1000 items
-      listCooks(0, 1000),
-      listEvents(0, 1000),
-      listCollaborationRequests(0, 1000),
-      listSeatRequests(0, 1000),
-    ])
+    // Fetch all data from Supabase in parallel with individual error handling
+    const [hostsResult, cooksResult, eventsResult, collaborationRequestsResult, seatRequestsResult] =
+      await Promise.allSettled([
+        listHosts(0, 1000),
+        listCooks(0, 1000),
+        listEvents(0, 1000),
+        listCollaborationRequests(0, 1000),
+        listSeatRequests(0, 1000),
+      ])
 
     const data: AppData = {
-      hosts: hostsPage.items,
-      cooks: cooksPage.items,
-      events: eventsPage.items,
-      collaborationRequests: collaborationRequestsPage.items,
-      seatRequests: seatRequestsPage.items,
+      hosts: hostsResult.status === "fulfilled" ? hostsResult.value.items : [],
+      cooks: cooksResult.status === "fulfilled" ? cooksResult.value.items : [],
+      events: eventsResult.status === "fulfilled" ? eventsResult.value.items : [],
+      collaborationRequests:
+        collaborationRequestsResult.status === "fulfilled" ? collaborationRequestsResult.value.items : [],
+      seatRequests: seatRequestsResult.status === "fulfilled" ? seatRequestsResult.value.items : [],
+    }
+
+    // Log any errors
+    if (hostsResult.status === "rejected") {
+      console.error("[v0] Error fetching hosts:", hostsResult.reason)
+    }
+    if (cooksResult.status === "rejected") {
+      console.error("[v0] Error fetching cooks:", cooksResult.reason)
+    }
+    if (eventsResult.status === "rejected") {
+      console.error("[v0] Error fetching events:", eventsResult.reason)
     }
 
     console.log("[v0] Data fetched from Supabase:", {
@@ -165,5 +180,77 @@ export async function updateSeatRequestStatus(
   } catch (error) {
     console.error("[v0] Error updating seat request status:", error)
     throw error
+  }
+}
+
+// New function to get user-specific data
+export async function getUserData(userEmail: string): Promise<{ hosts: Host[]; cooks: Cook[] }> {
+  try {
+    console.log("[v0] Fetching user data for:", userEmail)
+
+    const [hostsPage, cooksPage] = await Promise.all([
+      listHostsByUserEmail(userEmail, 0, 100),
+      listCooksByUserEmail(userEmail, 0, 100),
+    ])
+
+    console.log("[v0] User data fetched:", {
+      hosts: hostsPage.items.length,
+      cooks: cooksPage.items.length,
+    })
+
+    return {
+      hosts: hostsPage.items,
+      cooks: cooksPage.items,
+    }
+  } catch (error) {
+    console.error("[v0] Error fetching user data:", error)
+    return { hosts: [], cooks: [] }
+  }
+}
+
+export async function getCooksData(userEmail: string): Promise<{
+  cooks: Cook[]
+  hosts: Host[]
+  events: Event[]
+  collaborationRequests: CollaborationRequest[]
+}> {
+  try {
+    console.log("[v0] Fetching cooks data for:", userEmail)
+
+    // Fetch user's cooks and other data in parallel
+    const [cooksPage, eventsPage, collaborationRequestsPage] = await Promise.all([
+      listCooksByUserEmail(userEmail, 0, 100),
+      listEvents(0, 1000),
+      listCollaborationRequests(0, 1000),
+    ])
+
+    // Fetch hosts separately with error handling for timeouts
+    let hosts: Host[] = []
+    try {
+      const hostsPage = await listHosts(0, 1000)
+      hosts = hostsPage.items
+    } catch (error) {
+      console.error("[v0] Error fetching hosts (timeout), using empty array:", error)
+      hosts = []
+    }
+
+    const data = {
+      cooks: cooksPage.items,
+      hosts,
+      events: eventsPage.items,
+      collaborationRequests: collaborationRequestsPage.items,
+    }
+
+    console.log("[v0] Cooks data fetched:", {
+      cooks: data.cooks.length,
+      hosts: data.hosts.length,
+      events: data.events.length,
+      collaborationRequests: data.collaborationRequests.length,
+    })
+
+    return data
+  } catch (error) {
+    console.error("[v0] Error fetching cooks data:", error)
+    return { cooks: [], hosts: [], events: [], collaborationRequests: [] }
   }
 }
