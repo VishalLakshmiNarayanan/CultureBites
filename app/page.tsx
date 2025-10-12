@@ -12,7 +12,15 @@ import { UsersTab } from "@/components/tabs/users-tab"
 import { HostsTab } from "@/components/tabs/hosts-tab"
 import { CooksTab } from "@/components/tabs/cooks-tab"
 import { GuideTab } from "@/components/tabs/guide-tab"
-import { getCurrentUser, logoutUser } from "@/app/auth/actions"
+import { logoutUser } from "@/app/auth/actions"
+
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop()?.split(";").shift() || null
+  return null
+}
 
 export default function HomePage() {
   const router = useRouter()
@@ -23,15 +31,27 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const checkAuth = async () => {
-      console.log("[v0] Checking authentication")
-      const currentUser = await getCurrentUser()
+    console.log("[v0] Checking authentication")
+    const email = getCookie("user_email")
+    const role = getCookie("user_role")
+    const displayName = getCookie("user_name")
+
+    console.log("[v0] Cookies found:", { email, role, displayName })
+
+    if (email) {
+      const currentUser = {
+        email,
+        role: role || "",
+        displayName: displayName || email,
+      }
       console.log("[v0] Current user:", currentUser)
       setUser(currentUser)
-      setLoading(false)
+    } else {
+      console.log("[v0] No user found")
+      setUser(null)
     }
 
-    checkAuth()
+    setLoading(false)
   }, [])
 
   useEffect(() => {
@@ -64,7 +84,7 @@ export default function HomePage() {
     }
 
     // If switching to a public tab (non-role tab) and user is logged in, log them out
-    if (!navItem?.requiresAuth && user) {
+    if (!navItem?.requiresAuth && user && value !== "users") {
       console.log("[v0] Logging out user when switching to public tab:", value)
       await logoutUser()
       setUser(null)
