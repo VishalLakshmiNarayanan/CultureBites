@@ -3,6 +3,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
+import { MissionTab } from "@/components/tabs/mission-tab"
+import { TermsTab } from "@/components/tabs/terms-tab"
 import { UsersTab } from "@/components/tabs/users-tab"
 import { HostsTab } from "@/components/tabs/hosts-tab"
 import { CooksTab } from "@/components/tabs/cooks-tab"
@@ -24,18 +26,30 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-black relative">
-      {/* Ember Glow Background */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 50% 100%, rgba(255, 69, 0, 0.6) 0%, transparent 60%),
-            radial-gradient(circle at 50% 100%, rgba(255, 140, 0, 0.4) 0%, transparent 70%),
-            radial-gradient(circle at 50% 100%, rgba(255, 215, 0, 0.3) 0%, transparent 80%)
-          `,
-        }}
-      />
+    <div className="min-h-screen w-full bg-black relative overflow-hidden">
+      <div className="absolute inset-0 z-0">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url('/images/cooking-together.png')`,
+            filter: "blur(3px)",
+            opacity: 0.7,
+            transform: "scale(1.1)", // Prevents blur edge artifacts
+          }}
+        />
+
+        {/* Black/Dark Tint Overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
+              radial-gradient(circle at 50% 100%, rgba(255, 140, 0, 0.15) 0%, transparent 70%)
+            `,
+          }}
+        />
+      </div>
 
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header */}
@@ -57,8 +71,20 @@ export default function HomePage() {
         </div>
 
         {/* Main Tabs */}
-        <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8 bg-black/40 backdrop-blur-sm border border-orange-500/30">
+        <Tabs defaultValue="mission" className="w-full">
+          <TabsList className="grid w-full max-w-3xl mx-auto grid-cols-5 mb-8 bg-black/40 backdrop-blur-sm border border-orange-500/30">
+            <TabsTrigger
+              value="mission"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200"
+            >
+              Mission
+            </TabsTrigger>
+            <TabsTrigger
+              value="terms"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200"
+            >
+              Terms
+            </TabsTrigger>
             <TabsTrigger
               value="users"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200"
@@ -78,6 +104,14 @@ export default function HomePage() {
               Cooks
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="mission">
+            <MissionTab />
+          </TabsContent>
+
+          <TabsContent value="terms">
+            <TermsTab />
+          </TabsContent>
 
           <TabsContent value="users">
             <UsersTab />

@@ -18,11 +18,10 @@ import type { Cook } from "@/lib/types"
 interface CookProfileWizardProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  cookId: string
   onSuccess: () => void
 }
 
-export function CookProfileWizard({ open, onOpenChange, cookId, onSuccess }: CookProfileWizardProps) {
+export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfileWizardProps) {
   const [name, setName] = useState("")
   const [originCountry, setOriginCountry] = useState("")
   const [story, setStory] = useState("")
@@ -78,8 +77,10 @@ export function CookProfileWizard({ open, onOpenChange, cookId, onSuccess }: Coo
       return
     }
 
+    const uniqueId = `cook-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
     const newCook: Cook = {
-      id: cookId,
+      id: uniqueId,
       name: name.trim(),
       originCountry: originCountry.trim(),
       specialties,

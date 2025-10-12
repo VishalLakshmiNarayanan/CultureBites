@@ -7,6 +7,7 @@ import { GlassCard } from "@/components/glass-card"
 import { Badge } from "@/components/ui/badge"
 import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { HostCard } from "@/components/host-card"
 import { CollaborationRequestDialog } from "@/components/collaboration-request-dialog"
 import { CookProfileWizard } from "@/components/cook-profile-wizard"
@@ -19,7 +20,8 @@ const DEMO_COOK_ID = "cook-1"
 
 export function CooksTab() {
   const [showProfileWizard, setShowProfileWizard] = useState(false)
-  const [cook, setCook] = useState<Cook | null>(null)
+  const [myCooks, setMyCooks] = useState<Cook[]>([])
+  const [selectedCookId, setSelectedCookId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [minCapacity, setMinCapacity] = useState([0])
   const [hosts, setHosts] = useState<Host[]>([])
@@ -30,27 +32,33 @@ export function CooksTab() {
   const [showRequestDialog, setShowRequestDialog] = useState(false)
 
   useEffect(() => {
-    const data = getAppData()
-    const demoCook = data.cooks.find((c) => c.id === DEMO_COOK_ID)
-    setCook(demoCook || null)
-
-    setHosts(data.hosts)
-    setEvents(data.events)
-
-    const requests = data.collaborationRequests.filter((r) => r.fromCookId === DEMO_COOK_ID)
-    setMyRequests(requests)
+    refreshData()
   }, [])
 
   const refreshData = () => {
     const data = getAppData()
-    const demoCook = data.cooks.find((c) => c.id === DEMO_COOK_ID)
-    setCook(demoCook || null)
+    setMyCooks(data.cooks)
 
+    if (!selectedCookId && data.cooks.length > 0) {
+      setSelectedCookId(data.cooks[0].id)
+    }
+
+    setHosts(data.hosts)
     setEvents(data.events)
 
-    const requests = data.collaborationRequests.filter((r) => r.fromCookId === DEMO_COOK_ID)
-    setMyRequests(requests)
+    if (selectedCookId) {
+      const requests = data.collaborationRequests.filter((r) => r.fromCookId === selectedCookId)
+      setMyRequests(requests)
+    }
   }
+
+  useEffect(() => {
+    if (selectedCookId) {
+      refreshData()
+    }
+  }, [selectedCookId])
+
+  const selectedCook = myCooks.find((c) => c.id === selectedCookId)
 
   const filteredHosts = hosts.filter((host) => {
     const matchesSearch =
@@ -74,7 +82,7 @@ export function CooksTab() {
   const acceptedRequests = myRequests.filter((r) => r.status === "accepted")
   const declinedRequests = myRequests.filter((r) => r.status === "declined")
 
-  if (!cook) {
+  if (myCooks.length === 0) {
     return (
       <div className="space-y-8">
         <GlassCard className="p-12 text-center space-y-4 bg-white/80 backdrop-blur-md">
@@ -90,13 +98,7 @@ export function CooksTab() {
           </Button>
         </GlassCard>
 
-        {/* Cook Profile Wizard */}
-        <CookProfileWizard
-          open={showProfileWizard}
-          onOpenChange={setShowProfileWizard}
-          cookId={DEMO_COOK_ID}
-          onSuccess={refreshData}
-        />
+        <CookProfileWizard open={showProfileWizard} onOpenChange={setShowProfileWizard} onSuccess={refreshData} />
       </div>
     )
   }
@@ -118,6 +120,35 @@ export function CooksTab() {
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Left Column: Find Hosts (2/3 width) */}
       <div className="lg:col-span-2 space-y-6">
+        <GlassCard className="p-4 bg-white/80 backdrop-blur-md">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <Label className="text-sm font-semibold text-gray-700 mb-2 block">Active Cook Profile</Label>
+              <Select value={selectedCookId || undefined} onValueChange={setSelectedCookId}>
+                <SelectTrigger className="bg-white/60 border-orange-300">
+                  <SelectValue placeholder="Select a cook profile" />
+                </SelectTrigger>
+                <SelectContent>
+                  {myCooks.map((cook) => (
+                    <SelectItem key={cook.id} value={cook.id}>
+                      {cook.name} - {cook.originCountry}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              onClick={() => setShowProfileWizard(true)}
+              size="sm"
+              variant="outline"
+              className="border-orange-400 text-orange-700 hover:bg-orange-100 mt-6"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New Profile
+            </Button>
+          </div>
+        </GlassCard>
+
         <GlassCard className="p-6 bg-white/80 backdrop-blur-md">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">Find Hosts</h2>
 
@@ -257,16 +288,18 @@ export function CooksTab() {
       </div>
 
       {/* Collaboration Request Dialog */}
-      {selectedHost && (
+      {selectedCookId && selectedHost && (
         <CollaborationRequestDialog
           open={showRequestDialog}
           onOpenChange={setShowRequestDialog}
           host={selectedHost}
-          cookId={DEMO_COOK_ID}
+          cookId={selectedCookId}
           eventId={selectedEventId}
           onSuccess={refreshData}
         />
       )}
+
+      <CookProfileWizard open={showProfileWizard} onOpenChange={setShowProfileWizard} onSuccess={refreshData} />
     </div>
   )
 }

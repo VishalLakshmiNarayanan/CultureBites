@@ -17,11 +17,10 @@ import type { Host } from "@/lib/types"
 interface HostProfileWizardProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  hostId: string
   onSuccess: () => void
 }
 
-export function HostProfileWizard({ open, onOpenChange, hostId, onSuccess }: HostProfileWizardProps) {
+export function HostProfileWizard({ open, onOpenChange, onSuccess }: HostProfileWizardProps) {
   const [name, setName] = useState("")
   const [spaceTitle, setSpaceTitle] = useState("")
   const [spaceDesc, setSpaceDesc] = useState("")
@@ -45,8 +44,10 @@ export function HostProfileWizard({ open, onOpenChange, hostId, onSuccess }: Hos
 
     const finalCapacity = Math.min(Number.parseInt(capacity) || 6, 6)
 
+    const uniqueId = `host-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
     const newHost: Host = {
-      id: hostId,
+      id: uniqueId,
       name: name.trim(),
       spaceTitle: spaceTitle.trim(),
       spaceDesc: spaceDesc.trim(),
