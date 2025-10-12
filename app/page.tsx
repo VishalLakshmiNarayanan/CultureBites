@@ -1,8 +1,10 @@
 "use client"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState } from "react"
+import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Trash2 } from "lucide-react"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Menu, Trash2 } from "lucide-react"
 import { MissionTab } from "@/components/tabs/mission-tab"
 import { TermsTab } from "@/components/tabs/terms-tab"
 import { UsersTab } from "@/components/tabs/users-tab"
@@ -14,6 +16,8 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function HomePage() {
   const { toast } = useToast()
+  const [activeTab, setActiveTab] = useState("mission")
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const handleReset = () => {
     if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
@@ -24,6 +28,20 @@ export default function HomePage() {
       })
       setTimeout(() => window.location.reload(), 500)
     }
+  }
+
+  const navItems = [
+    { value: "mission", label: "Mission" },
+    { value: "terms", label: "Terms" },
+    { value: "users", label: "Guests" },
+    { value: "hosts", label: "Hosts" },
+    { value: "cooks", label: "Cooks" },
+    { value: "guide", label: "How It Works" },
+  ]
+
+  const handleNavClick = (value: string) => {
+    setActiveTab(value)
+    setMenuOpen(false)
   }
 
   return (
@@ -55,6 +73,39 @@ export default function HomePage() {
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 relative z-10">
         {/* Header */}
         <div className="text-center mb-4 sm:mb-8 relative">
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute left-0 top-0 text-orange-300 hover:text-orange-400 hover:bg-orange-950/30"
+              >
+                <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="bg-black/95 border-orange-500/30 backdrop-blur-md">
+              <SheetHeader>
+                <SheetTitle className="text-orange-400 text-xl font-bold">Navigation</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-2 mt-6">
+                {navItems.map((item) => (
+                  <Button
+                    key={item.value}
+                    variant="ghost"
+                    onClick={() => handleNavClick(item.value)}
+                    className={`justify-start text-left text-base py-6 ${
+                      activeTab === item.value
+                        ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white"
+                        : "text-orange-200 hover:text-orange-400 hover:bg-orange-950/30"
+                    }`}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+
           <Button
             variant="ghost"
             size="sm"
@@ -74,48 +125,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Main Tabs */}
-        <Tabs defaultValue="mission" className="w-full">
-          <TabsList className="grid w-full max-w-4xl mx-auto grid-cols-3 sm:grid-cols-6 gap-1 mb-4 sm:mb-8 bg-black/40 backdrop-blur-sm border border-orange-500/30 p-1">
-            <TabsTrigger
-              value="mission"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200 text-xs sm:text-sm"
-            >
-              Mission
-            </TabsTrigger>
-            <TabsTrigger
-              value="terms"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200 text-xs sm:text-sm"
-            >
-              Terms
-            </TabsTrigger>
-            <TabsTrigger
-              value="users"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200 text-xs sm:text-sm"
-            >
-              Guests
-            </TabsTrigger>
-            <TabsTrigger
-              value="hosts"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200 text-xs sm:text-sm"
-            >
-              Hosts
-            </TabsTrigger>
-            <TabsTrigger
-              value="cooks"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200 text-xs sm:text-sm"
-            >
-              Cooks
-            </TabsTrigger>
-            <TabsTrigger
-              value="guide"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200 text-xs sm:text-sm"
-            >
-              <span className="hidden sm:inline">How It Works</span>
-              <span className="sm:hidden">Guide</span>
-            </TabsTrigger>
-          </TabsList>
-
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsContent value="mission">
             <MissionTab />
           </TabsContent>
