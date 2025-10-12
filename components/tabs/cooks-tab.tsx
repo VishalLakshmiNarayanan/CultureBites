@@ -11,12 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { HostCard } from "@/components/host-card"
 import { CollaborationRequestDialog } from "@/components/collaboration-request-dialog"
 import { CookProfileWizard } from "@/components/cook-profile-wizard"
-import { Search, Plus } from "lucide-react"
+import { Search, Plus, User, MapPin } from "lucide-react"
 import { getAppData } from "@/lib/local-storage"
 import type { Host, CollaborationRequest, Cook, Event } from "@/lib/types"
-
-// Demo cook ID for prototype
-const DEMO_COOK_ID = "cook-1"
 
 export function CooksTab() {
   const [showProfileWizard, setShowProfileWizard] = useState(false)
@@ -118,8 +115,9 @@ export function CooksTab() {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8">
-      {/* Left Column: Find Hosts (2/3 width) */}
+      {/* Left Column: My Profile & Find Hosts (2/3 width) */}
       <div className="lg:col-span-2 space-y-6">
+        {/* Profile Selector Card */}
         <GlassCard className="p-4 bg-white/80 backdrop-blur-md">
           <div className="flex items-center gap-4">
             <div className="flex-1">
@@ -148,6 +146,74 @@ export function CooksTab() {
             </Button>
           </div>
         </GlassCard>
+
+        {/* My Cook Profile Section */}
+        {selectedCook && (
+          <GlassCard className="p-6 bg-white/80 backdrop-blur-md">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">My Cook Profile</h2>
+            <div className="space-y-4">
+              {/* Profile Picture and Basic Info */}
+              <div className="flex items-start gap-4">
+                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-orange-400 flex-shrink-0">
+                  {selectedCook.profileImage ? (
+                    <img
+                      src={selectedCook.profileImage || "/placeholder.svg"}
+                      alt={selectedCook.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                      <User className="w-10 h-10 text-white" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold text-gray-800">{selectedCook.name}</h3>
+                  <div className="flex items-center gap-1 text-gray-600 mt-1">
+                    <MapPin className="w-4 h-4 text-orange-500" />
+                    <span>{selectedCook.originCountry}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Specialties */}
+              <div>
+                <p className="text-sm font-semibold text-orange-600 mb-2">SPECIALTIES</p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedCook.specialties.map((specialty) => (
+                    <Badge key={specialty} className="bg-orange-100 text-orange-700 border-orange-300">
+                      {specialty}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Story */}
+              <div>
+                <p className="text-sm font-semibold text-orange-600 mb-2">MY STORY</p>
+                <p className="text-gray-700 text-sm leading-relaxed">{selectedCook.story}</p>
+              </div>
+
+              {/* Cuisine Images */}
+              {selectedCook.cuisineImages && selectedCook.cuisineImages.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold text-orange-600 mb-2">MY DISHES</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {selectedCook.cuisineImages.slice(0, 3).map((image, index) => (
+                      <div key={index} className="aspect-square rounded-lg overflow-hidden border-2 border-orange-200">
+                        <img
+                          src={image || "/placeholder.svg"}
+                          alt={`Dish ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </GlassCard>
+        )}
 
         <GlassCard className="p-6 bg-white/80 backdrop-blur-md">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">Find Hosts</h2>

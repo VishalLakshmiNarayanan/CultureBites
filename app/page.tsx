@@ -8,6 +8,7 @@ import { TermsTab } from "@/components/tabs/terms-tab"
 import { UsersTab } from "@/components/tabs/users-tab"
 import { HostsTab } from "@/components/tabs/hosts-tab"
 import { CooksTab } from "@/components/tabs/cooks-tab"
+import { GuideTab } from "@/components/tabs/guide-tab"
 import { resetAppData } from "@/lib/local-storage"
 import { useToast } from "@/hooks/use-toast"
 
@@ -72,7 +73,7 @@ export default function HomePage() {
 
         {/* Main Tabs */}
         <Tabs defaultValue="mission" className="w-full">
-          <TabsList className="grid w-full max-w-3xl mx-auto grid-cols-5 mb-8 bg-black/40 backdrop-blur-sm border border-orange-500/30">
+          <TabsList className="grid w-full max-w-4xl mx-auto grid-cols-6 mb-8 bg-black/40 backdrop-blur-sm border border-orange-500/30">
             <TabsTrigger
               value="mission"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200"
@@ -103,6 +104,12 @@ export default function HomePage() {
             >
               Cooks
             </TabsTrigger>
+            <TabsTrigger
+              value="guide"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-orange-200"
+            >
+              How It Works
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="mission">
@@ -123,6 +130,10 @@ export default function HomePage() {
 
           <TabsContent value="cooks">
             <CooksTab />
+          </TabsContent>
+
+          <TabsContent value="guide">
+            <GuideTab />
           </TabsContent>
         </Tabs>
       </div>
