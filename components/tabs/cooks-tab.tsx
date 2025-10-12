@@ -1,0 +1,272 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { GlassCard } from "@/components/glass-card"
+import { Badge } from "@/components/ui/badge"
+import { Slider } from "@/components/ui/slider"
+import { Label } from "@/components/ui/label"
+import { HostCard } from "@/components/host-card"
+import { CollaborationRequestDialog } from "@/components/collaboration-request-dialog"
+import { CookProfileWizard } from "@/components/cook-profile-wizard"
+import { Search, Plus } from "lucide-react"
+import { getAppData } from "@/lib/local-storage"
+import type { Host, CollaborationRequest, Cook, Event } from "@/lib/types"
+
+// Demo cook ID for prototype
+const DEMO_COOK_ID = "cook-1"
+
+export function CooksTab() {
+  const [showProfileWizard, setShowProfileWizard] = useState(false)
+  const [cook, setCook] = useState<Cook | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [minCapacity, setMinCapacity] = useState([0])
+  const [hosts, setHosts] = useState<Host[]>([])
+  const [events, setEvents] = useState<Event[]>([])
+  const [myRequests, setMyRequests] = useState<CollaborationRequest[]>([])
+  const [selectedHost, setSelectedHost] = useState<Host | null>(null)
+  const [selectedEventId, setSelectedEventId] = useState<string | undefined>(undefined)
+  const [showRequestDialog, setShowRequestDialog] = useState(false)
+
+  useEffect(() => {
+    const data = getAppData()
+    const demoCook = data.cooks.find((c) => c.id === DEMO_COOK_ID)
+    setCook(demoCook || null)
+
+    setHosts(data.hosts)
+    setEvents(data.events)
+
+    const requests = data.collaborationRequests.filter((r) => r.fromCookId === DEMO_COOK_ID)
+    setMyRequests(requests)
+  }, [])
+
+  const refreshData = () => {
+    const data = getAppData()
+    const demoCook = data.cooks.find((c) => c.id === DEMO_COOK_ID)
+    setCook(demoCook || null)
+
+    setEvents(data.events)
+
+    const requests = data.collaborationRequests.filter((r) => r.fromCookId === DEMO_COOK_ID)
+    setMyRequests(requests)
+  }
+
+  const filteredHosts = hosts.filter((host) => {
+    const matchesSearch =
+      searchQuery === "" ||
+      host.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      host.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      host.spaceTitle.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesCapacity = host.capacity >= minCapacity[0]
+
+    return matchesSearch && matchesCapacity
+  })
+
+  const handleRequestCollaboration = (host: Host, eventId?: string) => {
+    setSelectedHost(host)
+    setSelectedEventId(eventId)
+    setShowRequestDialog(true)
+  }
+
+  const pendingRequests = myRequests.filter((r) => r.status === "pending")
+  const acceptedRequests = myRequests.filter((r) => r.status === "accepted")
+  const declinedRequests = myRequests.filter((r) => r.status === "declined")
+
+  if (!cook) {
+    return (
+      <div className="space-y-8">
+        <GlassCard className="p-12 text-center space-y-4 bg-white/80 backdrop-blur-md">
+          <p className="text-gray-700 text-lg font-semibold">No cook profile available</p>
+          <p className="text-sm text-gray-600">Create a cook profile to start collaborating with hosts.</p>
+          <Button
+            onClick={() => setShowProfileWizard(true)}
+            size="lg"
+            className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Cook Profile
+          </Button>
+        </GlassCard>
+
+        {/* Cook Profile Wizard */}
+        <CookProfileWizard
+          open={showProfileWizard}
+          onOpenChange={setShowProfileWizard}
+          cookId={DEMO_COOK_ID}
+          onSuccess={refreshData}
+        />
+      </div>
+    )
+  }
+
+  if (hosts.length === 0) {
+    return (
+      <div className="space-y-8">
+        <GlassCard className="p-12 text-center bg-white/80 backdrop-blur-md">
+          <p className="text-gray-700 text-lg font-semibold">No hosts available</p>
+          <p className="text-sm text-gray-600 mt-2">
+            Hosts need to create their spaces before you can send collaboration requests.
+          </p>
+        </GlassCard>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid lg:grid-cols-3 gap-8">
+      {/* Left Column: Find Hosts (2/3 width) */}
+      <div className="lg:col-span-2 space-y-6">
+        <GlassCard className="p-6 bg-white/80 backdrop-blur-md">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Find Hosts</h2>
+
+          <div className="space-y-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-500" />
+              <Input
+                placeholder="Search by location, space name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-white/60 border-orange-300 text-gray-800 placeholder:text-gray-500 focus:border-orange-500"
+              />
+            </div>
+
+            {/* Capacity Filter */}
+            <div className="space-y-2">
+              <Label className="text-gray-700 font-semibold">Minimum Capacity: {minCapacity[0]}</Label>
+              <Slider
+                value={minCapacity}
+                onValueChange={setMinCapacity}
+                max={30}
+                step={5}
+                className="w-full [&_[role=slider]]:bg-orange-500 [&_[role=slider]]:border-orange-600"
+              />
+            </div>
+          </div>
+        </GlassCard>
+
+        {/* Host Grid */}
+        <div>
+          <h3 className="text-xl font-bold mb-4 text-amber-400">{filteredHosts.length} Spaces Available</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            {filteredHosts.map((host) => {
+              const hostEvents = events.filter((e) => e.hostId === host.id)
+              return (
+                <HostCard
+                  key={host.id}
+                  host={host}
+                  events={hostEvents}
+                  onRequestCollaboration={(eventId) => handleRequestCollaboration(host, eventId)}
+                />
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Right Column: My Connections (1/3 width) */}
+      <div className="space-y-6">
+        <GlassCard className="p-6 bg-white/80 backdrop-blur-md">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">My Connections</h2>
+
+          <div className="space-y-4">
+            {/* Pending */}
+            {pendingRequests.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-800">
+                  Pending
+                  <Badge variant="secondary" className="bg-orange-100 text-orange-700">
+                    {pendingRequests.length}
+                  </Badge>
+                </h3>
+                <div className="space-y-2">
+                  {pendingRequests.map((request) => {
+                    const host = hosts.find((h) => h.id === request.toHostId)
+                    const event = request.eventId ? events.find((e) => e.id === request.eventId) : null
+                    return (
+                      <div key={request.id} className="p-3 border-2 border-orange-200 rounded-lg text-sm bg-white/60">
+                        <p className="font-semibold text-gray-800">{host?.name}</p>
+                        <p className="text-gray-600">{host?.spaceTitle}</p>
+                        {event && <p className="text-xs text-orange-600 mt-1">For: {event.title}</p>}
+                        <p className="text-xs text-gray-500 mt-1">
+                          Sent {new Date(request.createdAtISO).toLocaleDateString()}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Accepted */}
+            {acceptedRequests.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-800">
+                  Accepted
+                  <Badge className="bg-green-500 text-white">{acceptedRequests.length}</Badge>
+                </h3>
+                <div className="space-y-2">
+                  {acceptedRequests.map((request) => {
+                    const host = hosts.find((h) => h.id === request.toHostId)
+                    const event = request.eventId ? events.find((e) => e.id === request.eventId) : null
+                    return (
+                      <div key={request.id} className="p-3 border-2 border-green-300 rounded-lg text-sm bg-green-50">
+                        <p className="font-semibold text-gray-800">{host?.name}</p>
+                        <p className="text-gray-600">{host?.spaceTitle}</p>
+                        {event && <p className="text-xs text-green-700 mt-1">Event: {event.title}</p>}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Declined */}
+            {declinedRequests.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-800">
+                  Declined
+                  <Badge variant="destructive">{declinedRequests.length}</Badge>
+                </h3>
+                <div className="space-y-2">
+                  {declinedRequests.map((request) => {
+                    const host = hosts.find((h) => h.id === request.toHostId)
+                    return (
+                      <div
+                        key={request.id}
+                        className="p-3 border-2 border-gray-300 rounded-lg text-sm opacity-60 bg-white/40"
+                      >
+                        <p className="font-semibold text-gray-700">{host?.name}</p>
+                        <p className="text-gray-600">{host?.spaceTitle}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {myRequests.length === 0 && (
+              <p className="text-center text-gray-600 py-8 text-sm">
+                No collaboration requests yet. Browse hosts and send a request!
+              </p>
+            )}
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Collaboration Request Dialog */}
+      {selectedHost && (
+        <CollaborationRequestDialog
+          open={showRequestDialog}
+          onOpenChange={setShowRequestDialog}
+          host={selectedHost}
+          cookId={DEMO_COOK_ID}
+          eventId={selectedEventId}
+          onSuccess={refreshData}
+        />
+      )}
+    </div>
+  )
+}
