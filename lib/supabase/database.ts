@@ -5,13 +5,15 @@ const PAGE_SIZE = 24
 
 type Page<T> = { items: T[]; nextOffset: number | null }
 
-export async function listHosts(offset = 0, limit = PAGE_SIZE): Promise<Page<Host>> {
+export async function listHosts(offset = 0, limit = PAGE_SIZE, userEmail?: string): Promise<Page<Host>> {
   const supabase = createClient()
-  const { data, error } = await supabase
-    .from("hosts")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1)
+  let query = supabase.from("hosts").select("*").order("created_at", { ascending: false })
+
+  if (userEmail) {
+    query = query.eq("user_email", userEmail)
+  }
+
+  const { data, error } = await query.range(offset, offset + limit - 1)
 
   if (error) {
     console.error("[v0] Error fetching hosts:", error)
@@ -27,19 +29,22 @@ export async function listHosts(offset = 0, limit = PAGE_SIZE): Promise<Page<Hos
     location: row.location,
     capacity: row.capacity,
     photos: row.images?.slice(1) || [], // Rest of images are photos
+    userEmail: row.user_email,
   }))
 
   const nextOffset = data.length < limit ? null : offset + limit
   return { items: hosts, nextOffset }
 }
 
-export async function listCooks(offset = 0, limit = PAGE_SIZE): Promise<Page<Cook>> {
+export async function listCooks(offset = 0, limit = PAGE_SIZE, userEmail?: string): Promise<Page<Cook>> {
   const supabase = createClient()
-  const { data, error } = await supabase
-    .from("cooks")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1)
+  let query = supabase.from("cooks").select("*").order("created_at", { ascending: false })
+
+  if (userEmail) {
+    query = query.eq("user_email", userEmail)
+  }
+
+  const { data, error } = await query.range(offset, offset + limit - 1)
 
   if (error) {
     console.error("[v0] Error fetching cooks:", error)
@@ -54,6 +59,7 @@ export async function listCooks(offset = 0, limit = PAGE_SIZE): Promise<Page<Coo
     specialties: row.specialties || [],
     story: row.story,
     cuisineImages: row.cuisine_images || [],
+    userEmail: row.user_email,
   }))
 
   const nextOffset = data.length < limit ? null : offset + limit
@@ -178,7 +184,7 @@ export async function listSeatRequestsByEvent(
 }
 
 // CREATE operations
-export async function createHost(host: Host): Promise<void> {
+export async function createHost(host: Host, userEmail?: string): Promise<void> {
   const supabase = createClient()
   // Profile image is stored as first item in images array
   const { error } = await supabase.from("hosts").insert({
@@ -190,6 +196,7 @@ export async function createHost(host: Host): Promise<void> {
     amenities: [], // Not in current Host type
     description: host.spaceDesc,
     images: host.profileImage ? [host.profileImage, ...host.photos] : host.photos,
+    user_email: userEmail, // Link to logged-in user
   })
 
   if (error) {
@@ -198,7 +205,7 @@ export async function createHost(host: Host): Promise<void> {
   }
 }
 
-export async function createCook(cook: Cook): Promise<void> {
+export async function createCook(cook: Cook, userEmail?: string): Promise<void> {
   const supabase = createClient()
   const { error } = await supabase.from("cooks").insert({
     id: cook.id,
@@ -208,6 +215,7 @@ export async function createCook(cook: Cook): Promise<void> {
     story: cook.story,
     profile_picture: cook.profileImage,
     cuisine_images: cook.cuisineImages,
+    user_email: userEmail, // Link to logged-in user
   })
 
   if (error) {

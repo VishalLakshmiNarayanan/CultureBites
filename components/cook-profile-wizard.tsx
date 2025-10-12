@@ -80,6 +80,11 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
 
     const uniqueId = `cook-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
+    const userEmail = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("user_email="))
+      ?.split("=")[1]
+
     const newCook: Cook = {
       id: uniqueId,
       name: name.trim(),
@@ -88,6 +93,7 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
       story: story.trim(),
       profileImage: profileImage || undefined,
       cuisineImages,
+      userEmail, // Link to logged-in user
     }
 
     console.log("[v0] Creating cook profile:", newCook)

@@ -74,7 +74,7 @@ export async function resetAppData(): Promise<void> {
 export async function addHost(host: Host): Promise<void> {
   try {
     console.log("[v0] Creating host in Supabase:", host.id)
-    await createHost(host)
+    await createHost(host, host.userEmail)
     console.log("[v0] Host created successfully in Supabase")
   } catch (error) {
     console.error("[v0] Error creating host:", error)
@@ -85,7 +85,7 @@ export async function addHost(host: Host): Promise<void> {
 export async function addCook(cook: Cook): Promise<void> {
   try {
     console.log("[v0] Creating cook in Supabase:", cook.id)
-    await createCook(cook)
+    await createCook(cook, cook.userEmail)
     console.log("[v0] Cook created successfully in Supabase")
   } catch (error) {
     console.error("[v0] Error creating cook:", error)

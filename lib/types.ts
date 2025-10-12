@@ -22,6 +22,7 @@ export type Host = {
   location: string
   capacity: number
   photos: string[]
+  userEmail?: string // Added userEmail to link host to logged-in user
 }
 
 export type Cook = {
@@ -32,6 +33,7 @@ export type Cook = {
   specialties: string[]
   story: string
   cuisineImages: string[]
+  userEmail?: string // Added userEmail to link cook to logged-in user
 }
 
 export type CollaborationRequest = {
@@ -49,6 +51,7 @@ export type SeatRequest = {
   id: string
   eventId: string
   guestName: string
+  guestEmail: string // Added guestEmail to type definition to match database schema
   note?: string
   createdAtISO: string
   status: "pending" | "approved" | "waitlist" | "declined"

@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { GlassCard } from "@/components/glass-card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { HostEventWizard } from "@/components/host-event-wizard"
 import { HostProfileWizard } from "@/components/host-profile-wizard"
 import { CookCard } from "@/components/cook-card"
@@ -39,17 +38,22 @@ export function HostsTab() {
   }, [])
 
   const refreshData = async () => {
+    // Get user email from cookies
+    const userEmail = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("user_email="))
+      ?.split("=")[1]
+
     const data = await getAppData()
     console.log("[v0] Refreshing host data. Total hosts:", (data.hosts || []).length)
-    console.log("[v0] Total events:", (data.events || []).length)
-    console.log(
-      "[v0] All events:",
-      (data.events || []).map((e) => ({ id: e.id, title: e.title, hostId: e.hostId })),
-    )
-    setMyHosts(data.hosts || [])
 
-    if (!selectedHostId && data.hosts && data.hosts.length > 0) {
-      setSelectedHostId(data.hosts[0].id)
+    const userHosts = userEmail ? (data.hosts || []).filter((h) => h.userEmail === userEmail) : []
+
+    console.log("[v0] User's hosts:", userHosts.length)
+    setMyHosts(userHosts)
+
+    if (!selectedHostId && userHosts.length > 0) {
+      setSelectedHostId(userHosts[0].id)
     }
 
     setCooks(data.cooks || [])
@@ -237,35 +241,6 @@ export function HostsTab() {
     <div className="grid lg:grid-cols-2 gap-8">
       {/* Left Column: My Space & Events */}
       <div className="space-y-6">
-        <GlassCard className="p-4 bg-white/80 backdrop-blur-md">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-gray-700 mb-2 block">Active Host Profile</div>
-              <Select value={selectedHostId || undefined} onValueChange={setSelectedHostId}>
-                <SelectTrigger className="bg-white/60 border-orange-300">
-                  <SelectValue placeholder="Select a host profile" />
-                </SelectTrigger>
-                <SelectContent>
-                  {myHosts.map((host) => (
-                    <SelectItem key={host.id} value={host.id}>
-                      {host.name} - {host.spaceTitle}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              onClick={() => setShowProfileWizard(true)}
-              size="sm"
-              variant="outline"
-              className="border-orange-400 text-orange-700 hover:bg-orange-100 mt-6"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Profile
-            </Button>
-          </div>
-        </GlassCard>
-
         {selectedHost && (
           <>
             <GlassCard className="p-6 bg-white/80 backdrop-blur-md">

@@ -46,6 +46,11 @@ export function HostProfileWizard({ open, onOpenChange, onSuccess }: HostProfile
 
     const uniqueId = `host-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
+    const userEmail = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("user_email="))
+      ?.split("=")[1]
+
     const newHost: Host = {
       id: uniqueId,
       name: name.trim(),
@@ -55,6 +60,7 @@ export function HostProfileWizard({ open, onOpenChange, onSuccess }: HostProfile
       capacity: finalCapacity,
       profileImage: profileImage || undefined,
       photos,
+      userEmail, // Link to logged-in user
     }
 
     console.log("[v0] Creating host profile:", newHost)

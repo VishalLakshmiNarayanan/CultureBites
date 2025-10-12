@@ -7,7 +7,6 @@ import { GlassCard } from "@/components/glass-card"
 import { Badge } from "@/components/ui/badge"
 import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { HostCard } from "@/components/host-card"
 import { CollaborationRequestDialog } from "@/components/collaboration-request-dialog"
 import { CookProfileWizard } from "@/components/cook-profile-wizard"
@@ -33,11 +32,21 @@ export function CooksTab() {
   }, [])
 
   const refreshData = async () => {
-    const data = await getAppData()
-    setMyCooks(data.cooks || [])
+    // Get user email from cookies
+    const userEmail = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("user_email="))
+      ?.split("=")[1]
 
-    if (!selectedCookId && data.cooks && data.cooks.length > 0) {
-      setSelectedCookId(data.cooks[0].id)
+    const data = await getAppData()
+
+    const userCooks = userEmail ? (data.cooks || []).filter((c) => c.userEmail === userEmail) : []
+
+    console.log("[v0] User's cooks:", userCooks.length)
+    setMyCooks(userCooks)
+
+    if (!selectedCookId && userCooks.length > 0) {
+      setSelectedCookId(userCooks[0].id)
     }
 
     setHosts(data.hosts || [])
@@ -117,36 +126,6 @@ export function CooksTab() {
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Left Column: My Profile & Find Hosts (2/3 width) */}
       <div className="lg:col-span-2 space-y-6">
-        {/* Profile Selector Card */}
-        <GlassCard className="p-4 bg-white/80 backdrop-blur-md">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <Label className="text-sm font-semibold text-gray-700 mb-2 block">Active Cook Profile</Label>
-              <Select value={selectedCookId || undefined} onValueChange={setSelectedCookId}>
-                <SelectTrigger className="bg-white/60 border-orange-300">
-                  <SelectValue placeholder="Select a cook profile" />
-                </SelectTrigger>
-                <SelectContent>
-                  {myCooks.map((cook) => (
-                    <SelectItem key={cook.id} value={cook.id}>
-                      {cook.name} - {cook.originCountry}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              onClick={() => setShowProfileWizard(true)}
-              size="sm"
-              variant="outline"
-              className="border-orange-400 text-orange-700 hover:bg-orange-100 mt-6"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Profile
-            </Button>
-          </div>
-        </GlassCard>
-
         {/* My Cook Profile Section */}
         {selectedCook && (
           <GlassCard className="p-6 bg-white/80 backdrop-blur-md">
