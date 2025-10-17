@@ -103,7 +103,7 @@ export default function SignUpPage() {
                   onClick={() => handleRoleSelect("user")}
                   className="p-8 border-2 border-orange-500/30 rounded-lg hover:border-orange-500 hover:bg-orange-950/30 transition-all text-center group"
                 >
-                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">🍽️</div>
+                  <img src="/images/guests.png" alt="Guest" className="mx-auto mb-4 h-20 w-20 object-contain group-hover:scale-110 transition-transform" />
                   <h3 className="text-xl font-bold mb-2 text-orange-300">Guest</h3>
                   <p className="text-sm text-orange-200/70">Discover and book unique dining experiences</p>
                 </button>
@@ -112,7 +112,7 @@ export default function SignUpPage() {
                   onClick={() => handleRoleSelect("host")}
                   className="p-8 border-2 border-orange-500/30 rounded-lg hover:border-amber-500 hover:bg-amber-950/30 transition-all text-center group"
                 >
-                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">🏠</div>
+                  <img src="/images/hosts.png" alt="Host" className="mx-auto mb-4 h-20 w-20 object-contain group-hover:scale-110 transition-transform" />
                   <h3 className="text-xl font-bold mb-2 text-amber-300">Host</h3>
                   <p className="text-sm text-amber-200/70">Share your space for culinary events</p>
                 </button>
@@ -121,7 +121,7 @@ export default function SignUpPage() {
                   onClick={() => handleRoleSelect("cook")}
                   className="p-8 border-2 border-orange-500/30 rounded-lg hover:border-yellow-500 hover:bg-yellow-950/30 transition-all text-center group"
                 >
-                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">👨‍🍳</div>
+                  <img src="/images/cooks.png" alt="Cook" className="mx-auto mb-4 h-20 w-20 object-contain group-hover:scale-110 transition-transform" />
                   <h3 className="text-xl font-bold mb-2 text-yellow-300">Cook</h3>
                   <p className="text-sm text-yellow-200/70">Showcase your culinary talents</p>
                 </button>
