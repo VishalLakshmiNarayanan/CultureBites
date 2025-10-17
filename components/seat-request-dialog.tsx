@@ -59,7 +59,7 @@ export function SeatRequestDialog({ open, onOpenChange, event }: SeatRequestDial
 
       // Create seat request
       const newRequest: SeatRequest = {
-        id: `seat-${Date.now()}`,
+        id: crypto.randomUUID(),
         eventId: event.id,
         guestName: guestName.trim(),
         note: note.trim() || undefined,

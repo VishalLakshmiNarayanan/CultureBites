@@ -19,9 +19,11 @@ interface CookProfileWizardProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
+  userEmail?: string
+  userId?: string
 }
 
-export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfileWizardProps) {
+export function CookProfileWizard({ open, onOpenChange, onSuccess, userEmail, userId }: CookProfileWizardProps) {
   const [name, setName] = useState("")
   const [originCountry, setOriginCountry] = useState("")
   const [story, setStory] = useState("")
@@ -45,7 +47,26 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
   }
 
   const handleSubmit = async () => {
-    console.log("[v0] Cook profile submit - name:", name, "country:", originCountry, "specialties:", specialties)
+    console.log(
+      "[v0] Cook profile submit - userId:",
+      userId,
+      "name:",
+      name,
+      "country:",
+      originCountry,
+      "specialties:",
+      specialties,
+    )
+
+    if (!userId) {
+      console.error("[v0] Error: userId is required but not provided")
+      toast({
+        title: "Error",
+        description: "User ID is missing. Please try logging in again.",
+        variant: "destructive",
+      })
+      return
+    }
 
     const newErrors: { [key: string]: boolean } = {}
     const missingFields: string[] = []
@@ -78,19 +99,18 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
       return
     }
 
-    const uniqueId = `cook-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-
     const newCook: Cook = {
-      id: uniqueId,
+      id: userId,
       name: name.trim(),
       originCountry: originCountry.trim(),
       specialties,
       story: story.trim(),
       profileImage: profileImage || undefined,
       cuisineImages,
+      userEmail,
     }
 
-    console.log("[v0] Creating cook profile:", newCook)
+    console.log("[v0] Creating cook profile with UUID:", newCook.id)
 
     try {
       await addCook(newCook)
@@ -113,6 +133,7 @@ export function CookProfileWizard({ open, onOpenChange, onSuccess }: CookProfile
       onSuccess()
       onOpenChange(false)
     } catch (error) {
+      console.error("[v0] Error creating cook:", error)
       toast({
         title: "Error",
         description: "Failed to create cook profile. Please try again.",

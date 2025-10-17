@@ -77,7 +77,7 @@ export function CollaborationRequestDialog({
     }
 
     const newRequest: CollaborationRequest = {
-      id: `collab-${Date.now()}`,
+      id: crypto.randomUUID(),
       fromCookId: cookId || cook?.id || "",
       toHostId: hostId || host?.id || "",
       eventId: eventId,
@@ -88,6 +88,7 @@ export function CollaborationRequestDialog({
     }
 
     try {
+      console.log("[v0] Creating collaboration request in Supabase:", newRequest.id)
       await addCollaborationRequest(newRequest)
 
       const recipientName = host?.name || cook?.name || "them"

@@ -14,8 +14,8 @@ import {
   updateEventCook,
   updateCollaborationRequestStatus,
   updateSeatRequestStatus as updateSeatRequestStatusFunc,
-  listHostsByUserEmail,
-  listCooksByUserEmail,
+  listHostsByUserId,
+  listCooksByUserId,
 } from "@/lib/supabase/database"
 import type { Host, Cook, Event, CollaborationRequest, SeatRequest } from "@/lib/types"
 
@@ -89,7 +89,7 @@ export async function resetAppData(): Promise<void> {
 export async function addHost(host: Host): Promise<void> {
   try {
     console.log("[v0] Creating host in Supabase:", host.id)
-    await createHost(host, host.userEmail)
+    await createHost(host, host.id)
     console.log("[v0] Host created successfully in Supabase")
   } catch (error) {
     console.error("[v0] Error creating host:", error)
@@ -100,7 +100,7 @@ export async function addHost(host: Host): Promise<void> {
 export async function addCook(cook: Cook): Promise<void> {
   try {
     console.log("[v0] Creating cook in Supabase:", cook.id)
-    await createCook(cook, cook.userEmail)
+    await createCook(cook, cook.id)
     console.log("[v0] Cook created successfully in Supabase")
   } catch (error) {
     console.error("[v0] Error creating cook:", error)
@@ -184,13 +184,13 @@ export async function updateSeatRequestStatus(
 }
 
 // New function to get user-specific data
-export async function getUserData(userEmail: string): Promise<{ hosts: Host[]; cooks: Cook[] }> {
+export async function getUserData(userId: string): Promise<{ hosts: Host[]; cooks: Cook[] }> {
   try {
-    console.log("[v0] Fetching user data for:", userEmail)
+    console.log("[v0] Fetching user data for:", userId)
 
     const [hostsPage, cooksPage] = await Promise.all([
-      listHostsByUserEmail(userEmail, 0, 100),
-      listCooksByUserEmail(userEmail, 0, 100),
+      listHostsByUserId(userId, 0, 100),
+      listCooksByUserId(userId, 0, 100),
     ])
 
     console.log("[v0] User data fetched:", {
@@ -208,18 +208,17 @@ export async function getUserData(userEmail: string): Promise<{ hosts: Host[]; c
   }
 }
 
-export async function getCooksData(userEmail: string): Promise<{
+export async function getCooksData(userId: string): Promise<{
   cooks: Cook[]
   hosts: Host[]
   events: Event[]
   collaborationRequests: CollaborationRequest[]
 }> {
   try {
-    console.log("[v0] Fetching cooks data for:", userEmail)
+    console.log("[v0] Fetching cooks data for:", userId)
 
-    // Fetch user's cooks and other data in parallel
     const [cooksPage, eventsPage, collaborationRequestsPage] = await Promise.all([
-      listCooksByUserEmail(userEmail, 0, 100),
+      listCooksByUserId(userId, 0, 100),
       listEvents(0, 1000),
       listCollaborationRequests(0, 1000),
     ])

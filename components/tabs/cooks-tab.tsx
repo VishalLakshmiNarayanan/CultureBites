@@ -12,6 +12,7 @@ import { HostCard } from "@/components/host-card"
 import { CollaborationRequestDialog } from "@/components/collaboration-request-dialog"
 import { CookProfileWizard } from "@/components/cook-profile-wizard"
 import { Search, Plus, User, MapPin } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 import { getAppData } from "@/lib/local-storage"
 import type { Host, CollaborationRequest, Cook, Event } from "@/lib/types"
 
@@ -27,6 +28,23 @@ export function CooksTab() {
   const [selectedHost, setSelectedHost] = useState<Host | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<string | undefined>(undefined)
   const [showRequestDialog, setShowRequestDialog] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function loadUser() {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (user) {
+        setUserId(user.id)
+        setUserEmail(user.email || null)
+      }
+    }
+    loadUser()
+  }, [])
 
   useEffect(() => {
     refreshData()
@@ -98,14 +116,18 @@ export function CooksTab() {
           </Button>
         </GlassCard>
 
-        <CookProfileWizard
-          open={showProfileWizard}
-          onOpenChange={setShowProfileWizard}
-          onSuccess={() => {
-            setShowProfileWizard(false)
-            refreshData()
-          }}
-        />
+        {userId && userEmail && (
+          <CookProfileWizard
+            open={showProfileWizard}
+            onOpenChange={setShowProfileWizard}
+            onSuccess={() => {
+              setShowProfileWizard(false)
+              refreshData()
+            }}
+            userId={userId}
+            userEmail={userEmail}
+          />
+        )}
       </div>
     )
   }
@@ -375,14 +397,18 @@ export function CooksTab() {
         />
       )}
 
-      <CookProfileWizard
-        open={showProfileWizard}
-        onOpenChange={setShowProfileWizard}
-        onSuccess={() => {
-          setShowProfileWizard(false)
-          refreshData()
-        }}
-      />
+      {userId && userEmail && (
+        <CookProfileWizard
+          open={showProfileWizard}
+          onOpenChange={setShowProfileWizard}
+          onSuccess={() => {
+            setShowProfileWizard(false)
+            refreshData()
+          }}
+          userId={userId}
+          userEmail={userEmail}
+        />
+      )}
     </div>
   )
 }

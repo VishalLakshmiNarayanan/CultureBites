@@ -22,6 +22,7 @@ export type Host = {
   location: string
   capacity: number
   photos: string[]
+  userEmail?: string // Added userEmail to link host to authenticated user
 }
 
 export type Cook = {
@@ -32,6 +33,7 @@ export type Cook = {
   specialties: string[]
   story: string
   cuisineImages: string[]
+  userEmail?: string // Added userEmail to link cook to authenticated user
 }
 
 export type CollaborationRequest = {
@@ -61,3 +63,5 @@ export type AppData = {
   collaborationRequests: CollaborationRequest[]
   seatRequests: SeatRequest[]
 }
+
+export type UserRole = "user" | "host" | "cook"

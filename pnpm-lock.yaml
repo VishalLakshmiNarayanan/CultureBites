@@ -97,16 +97,16 @@ importers:
         version: 1.1.6(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@supabase/ssr':
         specifier: latest
-        version: 0.7.0(@supabase/supabase-js@2.75.0)
+        version: 0.7.0(@supabase/supabase-js@2.75.1)
       '@supabase/supabase-js':
         specifier: latest
-        version: 2.75.0
+        version: 2.75.1
       '@vercel/analytics':
         specifier: 1.3.1
         version: 1.3.1(next@15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       ai:
         specifier: latest
-        version: 5.0.68(zod@3.25.76)
+        version: 5.0.76(zod@3.25.76)
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.5.0)
@@ -170,6 +170,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@4.1.9)
+      uuid:
+        specifier: latest
+        version: 13.0.0
       vaul:
         specifier: ^0.9.9
         version: 0.9.9(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -204,8 +207,8 @@ importers:
 
 packages:
 
-  '@ai-sdk/gateway@1.0.39':
-    resolution: {integrity: sha512-ijYCKG2sbn2RBVfIgaXNXvzHAf2HpFXxQODtjMI+T7Z4CLryflytchsZZ9qrGtsjiQVopKOV6m6kj4lq5fnbsg==}
+  '@ai-sdk/gateway@2.0.0':
+    resolution: {integrity: sha512-Gj0PuawK7NkZuyYgO/h5kDK/l6hFOjhLdTq3/Lli1FTl47iGmwhH1IZQpAL3Z09BeFYWakcwUmn02ovIm2wy9g==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1351,32 +1354,32 @@ packages:
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
-  '@supabase/auth-js@2.75.0':
-    resolution: {integrity: sha512-J8TkeqCOMCV4KwGKVoxmEBuDdHRwoInML2vJilthOo7awVCro2SM+tOcpljORwuBQ1vHUtV62Leit+5wlxrNtw==}
+  '@supabase/auth-js@2.75.1':
+    resolution: {integrity: sha512-zktlxtXstQuVys/egDpVsargD9hQtG20CMdtn+mMn7d2Ulkzy2tgUT5FUtpppvCJtd9CkhPHO/73rvi5W6Am5A==}
 
-  '@supabase/functions-js@2.75.0':
-    resolution: {integrity: sha512-18yk07Moj/xtQ28zkqswxDavXC3vbOwt1hDuYM3/7xPnwwpKnsmPyZ7bQ5th4uqiJzQ135t74La9tuaxBR6e7w==}
+  '@supabase/functions-js@2.75.1':
+    resolution: {integrity: sha512-xO+01SUcwVmmo67J7Htxq8FmhkYLFdWkxfR/taxBOI36wACEUNQZmroXGPl4PkpYxBO7TaDsRHYGxUpv9zTKkg==}
 
   '@supabase/node-fetch@2.6.15':
     resolution: {integrity: sha512-1ibVeYUacxWYi9i0cf5efil6adJ9WRyZBLivgjs+AUpewx1F3xPi7gLgaASI2SmIQxPoCEjAsLAzKPgMJVgOUQ==}
     engines: {node: 4.x || >=6.0.0}
 
-  '@supabase/postgrest-js@2.75.0':
-    resolution: {integrity: sha512-YfBz4W/z7eYCFyuvHhfjOTTzRrQIvsMG2bVwJAKEVVUqGdzqfvyidXssLBG0Fqlql1zJFgtsPpK1n4meHrI7tg==}
+  '@supabase/postgrest-js@2.75.1':
+    resolution: {integrity: sha512-FiYBD0MaKqGW8eo4Xqu7/100Xm3ddgh+3qHtqS18yQRoglJTFRQCJzY1xkrGS0JFHE2YnbjL6XCiOBXiG8DK4Q==}
 
-  '@supabase/realtime-js@2.75.0':
-    resolution: {integrity: sha512-B4Xxsf2NHd5cEnM6MGswOSPSsZKljkYXpvzKKmNxoUmNQOfB7D8HOa6NwHcUBSlxcjV+vIrYKcYXtavGJqeGrw==}
+  '@supabase/realtime-js@2.75.1':
+    resolution: {integrity: sha512-lBIJ855bUsBFScHA/AY+lxIFkubduUvmwbagbP1hq0wDBNAsYdg3ql80w8YmtXCDjkCwlE96SZqcFn7BGKKJKQ==}
 
   '@supabase/ssr@0.7.0':
     resolution: {integrity: sha512-G65t5EhLSJ5c8hTCcXifSL9Q/ZRXvqgXeNo+d3P56f4U1IxwTqjB64UfmfixvmMcjuxnq2yGqEWVJqUcO+AzAg==}
     peerDependencies:
       '@supabase/supabase-js': ^2.43.4
 
-  '@supabase/storage-js@2.75.0':
-    resolution: {integrity: sha512-wpJMYdfFDckDiHQaTpK+Ib14N/O2o0AAWWhguKvmmMurB6Unx17GGmYp5rrrqCTf8S1qq4IfIxTXxS4hzrUySg==}
+  '@supabase/storage-js@2.75.1':
+    resolution: {integrity: sha512-WdGEhroflt5O398Yg3dpf1uKZZ6N3CGloY9iGsdT873uWbkQKoP0wG8mtx98dh0fhj6dAlzBqOAvnlV12cJfzA==}
 
-  '@supabase/supabase-js@2.75.0':
-    resolution: {integrity: sha512-8UN/vATSgS2JFuJlMVr51L3eUDz+j1m7Ww63wlvHLKULzCDaVWYzvacCjBTLW/lX/vedI2LBI4Vg+01G9ufsJQ==}
+  '@supabase/supabase-js@2.75.1':
+    resolution: {integrity: sha512-GEPVBvjQimcMd9z5K1eTKTixTRb6oVbudoLQ9JKqTUJnR6GQdBU4OifFZean1AnHfsQwtri1fop2OWwsMv019w==}
 
   '@swc/counter@0.1.3':
     resolution: {integrity: sha512-e2BR4lsJkkRlKZ/qCHPw9ZaSxc0MVUd7gtbtaB7aMvHeJVYe8sOB8DBZkP2DtISHGSku9sCK6T6cnY0CtXrOCQ==}
@@ -1525,12 +1528,12 @@ packages:
       react:
         optional: true
 
-  '@vercel/oidc@3.0.2':
-    resolution: {integrity: sha512-JekxQ0RApo4gS4un/iMGsIL1/k4KUBe3HmnGcDvzHuFBdQdudEJgTqcsJC7y6Ul4Yw5CeykgvQbX2XeEJd0+DA==}
+  '@vercel/oidc@3.0.3':
+    resolution: {integrity: sha512-yNEQvPcVrK9sIe637+I0jD6leluPxzwJKx/Haw6F4H77CdDsszUn5V3o96LPziXkSNE2B83+Z3mjqGKBK/R6Gg==}
     engines: {node: '>= 20'}
 
-  ai@5.0.68:
-    resolution: {integrity: sha512-SB6r+4TkKVlSg2ozGBSfuf6Is5hrcX/bpGBzOoyHIN3b4ILGhaly0IHEvP8+3GGIHXqtkPVEUmR6V05jKdjNlg==}
+  ai@5.0.76:
+    resolution: {integrity: sha512-ZCxi1vrpyCUnDbtYrO/W8GLvyacV9689f00yshTIQ3mFFphbD7eIv40a2AOZBv3GGRA7SSRYIDnr56wcS/gyQg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -2106,6 +2109,10 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
+  uuid@13.0.0:
+    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+    hasBin: true
+
   vaul@0.9.9:
     resolution: {integrity: sha512-7afKg48srluhZwIkaU+lgGtFCUsYBSGOl8vcc8N/M3YQlZFlynHD15AE+pwrYdc826o7nrIND4lL9Y6b9WWZZQ==}
     peerDependencies:
@@ -2142,11 +2149,11 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/gateway@1.0.39(zod@3.25.76)':
+  '@ai-sdk/gateway@2.0.0(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.12(zod@3.25.76)
-      '@vercel/oidc': 3.0.2
+      '@vercel/oidc': 3.0.3
       zod: 3.25.76
 
   '@ai-sdk/provider-utils@3.0.12(zod@3.25.76)':
@@ -3255,11 +3262,11 @@ snapshots:
 
   '@standard-schema/spec@1.0.0': {}
 
-  '@supabase/auth-js@2.75.0':
+  '@supabase/auth-js@2.75.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
 
-  '@supabase/functions-js@2.75.0':
+  '@supabase/functions-js@2.75.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
 
@@ -3267,11 +3274,11 @@ snapshots:
     dependencies:
       whatwg-url: 5.0.0
 
-  '@supabase/postgrest-js@2.75.0':
+  '@supabase/postgrest-js@2.75.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
 
-  '@supabase/realtime-js@2.75.0':
+  '@supabase/realtime-js@2.75.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
       '@types/phoenix': 1.6.6
@@ -3281,23 +3288,23 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@supabase/ssr@0.7.0(@supabase/supabase-js@2.75.0)':
+  '@supabase/ssr@0.7.0(@supabase/supabase-js@2.75.1)':
     dependencies:
-      '@supabase/supabase-js': 2.75.0
+      '@supabase/supabase-js': 2.75.1
       cookie: 1.0.2
 
-  '@supabase/storage-js@2.75.0':
+  '@supabase/storage-js@2.75.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
 
-  '@supabase/supabase-js@2.75.0':
+  '@supabase/supabase-js@2.75.1':
     dependencies:
-      '@supabase/auth-js': 2.75.0
-      '@supabase/functions-js': 2.75.0
+      '@supabase/auth-js': 2.75.1
+      '@supabase/functions-js': 2.75.1
       '@supabase/node-fetch': 2.6.15
-      '@supabase/postgrest-js': 2.75.0
-      '@supabase/realtime-js': 2.75.0
-      '@supabase/storage-js': 2.75.0
+      '@supabase/postgrest-js': 2.75.1
+      '@supabase/realtime-js': 2.75.1
+      '@supabase/storage-js': 2.75.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -3429,11 +3436,11 @@ snapshots:
       next: 15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
 
-  '@vercel/oidc@3.0.2': {}
+  '@vercel/oidc@3.0.3': {}
 
-  ai@5.0.68(zod@3.25.76):
+  ai@5.0.76(zod@3.25.76):
     dependencies:
-      '@ai-sdk/gateway': 1.0.39(zod@3.25.76)
+      '@ai-sdk/gateway': 2.0.0(zod@3.25.76)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.12(zod@3.25.76)
       '@opentelemetry/api': 1.9.0
@@ -3958,6 +3965,8 @@ snapshots:
   use-sync-external-store@1.6.0(react@19.0.0):
     dependencies:
       react: 19.0.0
+
+  uuid@13.0.0: {}
 
   vaul@0.9.9(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:

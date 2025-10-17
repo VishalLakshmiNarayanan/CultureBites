@@ -18,9 +18,11 @@ interface HostProfileWizardProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
+  userEmail?: string
+  userId?: string
 }
 
-export function HostProfileWizard({ open, onOpenChange, onSuccess }: HostProfileWizardProps) {
+export function HostProfileWizard({ open, onOpenChange, onSuccess, userEmail, userId }: HostProfileWizardProps) {
   const [name, setName] = useState("")
   const [spaceTitle, setSpaceTitle] = useState("")
   const [spaceDesc, setSpaceDesc] = useState("")
@@ -31,7 +33,26 @@ export function HostProfileWizard({ open, onOpenChange, onSuccess }: HostProfile
   const { toast } = useToast()
 
   const handleSubmit = async () => {
-    console.log("[v0] Host profile submit - name:", name, "space:", spaceTitle, "location:", location)
+    console.log(
+      "[v0] Host profile submit - userId:",
+      userId,
+      "name:",
+      name,
+      "space:",
+      spaceTitle,
+      "location:",
+      location,
+    )
+
+    if (!userId) {
+      console.error("[v0] Error: userId is required but not provided")
+      toast({
+        title: "Error",
+        description: "User ID is missing. Please try logging in again.",
+        variant: "destructive",
+      })
+      return
+    }
 
     if (!name.trim() || !spaceTitle.trim() || !spaceDesc.trim() || !location.trim()) {
       toast({
@@ -44,10 +65,8 @@ export function HostProfileWizard({ open, onOpenChange, onSuccess }: HostProfile
 
     const finalCapacity = Math.min(Number.parseInt(capacity) || 6, 6)
 
-    const uniqueId = `host-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-
     const newHost: Host = {
-      id: uniqueId,
+      id: userId,
       name: name.trim(),
       spaceTitle: spaceTitle.trim(),
       spaceDesc: spaceDesc.trim(),
@@ -55,9 +74,10 @@ export function HostProfileWizard({ open, onOpenChange, onSuccess }: HostProfile
       capacity: finalCapacity,
       profileImage: profileImage || undefined,
       photos,
+      userEmail,
     }
 
-    console.log("[v0] Creating host profile:", newHost)
+    console.log("[v0] Creating host profile with UUID:", newHost.id)
 
     try {
       await addHost(newHost)
@@ -78,6 +98,7 @@ export function HostProfileWizard({ open, onOpenChange, onSuccess }: HostProfile
       onSuccess()
       onOpenChange(false)
     } catch (error) {
+      console.error("[v0] Error creating host:", error)
       toast({
         title: "Error",
         description: "Failed to create host profile. Please try again.",

@@ -11,6 +11,7 @@ import { HostProfileWizard } from "@/components/host-profile-wizard"
 import { CookCard } from "@/components/cook-card"
 import { CollaborationRequestDialog } from "@/components/collaboration-request-dialog"
 import { Plus, MapPin, Users } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 import {
   getAppData,
   updateCollaborationStatus,
@@ -32,7 +33,24 @@ export function HostsTab() {
   const [cooks, setCooks] = useState<Cook[]>([])
   const [selectedCook, setSelectedCook] = useState<Cook | null>(null)
   const [showCookRequestDialog, setShowCookRequestDialog] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const { toast } = useToast()
+
+  useEffect(() => {
+    async function loadUser() {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (user) {
+        setUserId(user.id)
+        setUserEmail(user.email || null)
+      }
+    }
+    loadUser()
+  }, [])
 
   useEffect(() => {
     refreshData()
@@ -221,7 +239,15 @@ export function HostsTab() {
           </Button>
         </GlassCard>
 
-        <HostProfileWizard open={showProfileWizard} onOpenChange={setShowProfileWizard} onSuccess={refreshData} />
+        {userId && userEmail && (
+          <HostProfileWizard
+            open={showProfileWizard}
+            onOpenChange={setShowProfileWizard}
+            onSuccess={refreshData}
+            userId={userId}
+            userEmail={userEmail}
+          />
+        )}
       </div>
     )
   }
@@ -300,7 +326,7 @@ export function HostsTab() {
                   </TabsTrigger>
                   <TabsTrigger
                     value="past"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-500 data-[state=active]:text-white"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white"
                   >
                     Past ({pastEvents.length})
                   </TabsTrigger>
@@ -565,7 +591,15 @@ export function HostsTab() {
         </>
       )}
 
-      <HostProfileWizard open={showProfileWizard} onOpenChange={setShowProfileWizard} onSuccess={refreshData} />
+      {userId && userEmail && (
+        <HostProfileWizard
+          open={showProfileWizard}
+          onOpenChange={setShowProfileWizard}
+          onSuccess={refreshData}
+          userId={userId}
+          userEmail={userEmail}
+        />
+      )}
     </div>
   )
 }

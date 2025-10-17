@@ -12,6 +12,7 @@ import { ImageUpload } from "@/components/image-upload"
 import { useToast } from "@/hooks/use-toast"
 import { addEvent } from "@/lib/local-storage"
 import type { Event } from "@/lib/types"
+import { v4 as uuidv4 } from "uuid"
 
 interface HostEventWizardProps {
   open: boolean
@@ -78,7 +79,7 @@ export function HostEventWizard({ open, onOpenChange, hostId, onSuccess }: HostE
 
   const handlePublish = async () => {
     const newEvent: Event = {
-      id: `event-${Date.now()}`,
+      id: uuidv4(),
       title,
       cuisine,
       hostId,
