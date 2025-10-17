@@ -81,11 +81,17 @@ export default function SignUpPage() {
         <div className="w-full max-w-4xl relative z-10">
           <Card className="backdrop-blur-md bg-black/60 border-orange-500/30">
             <CardHeader className="text-center">
-              <div className="flex flex-col items-center mb-6">
-                <img src="/images/cooking-together.png" alt="Culture Bites Logo" className="w-32 h-32 mb-4 rounded-full object-cover" />
-                <h1 className="text-3xl font-bold text-orange-400 mb-2">Culture Bites</h1>
-                <p className="text-center text-orange-200/80">Connect through authentic culinary experiences</p>
+              <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3">
+                <img
+                  src="/images/logo.png"
+                  alt="CultureBites Logo"
+                  className="h-12 w-12 sm:h-16 sm:w-16 object-contain"
+                />
+                <h1 className="text-2xl sm:text-3xl font-bold text-balance bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent">
+                  CultureBites
+                </h1>
               </div>
+
               <CardTitle className="text-3xl text-orange-400">Choose Your Role</CardTitle>
               <CardDescription className="text-orange-200/80">
                 Select how you want to participate in CultureBites

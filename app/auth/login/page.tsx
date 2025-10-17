@@ -17,7 +17,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const logoPath = "/images/culture-bites-logo.png" // Make sure this path matches your logo location
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -90,16 +89,17 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10">
         <Card className="backdrop-blur-md bg-black/60 border-orange-500/30">
           <CardHeader>
-            <div className="flex items-center gap-4 mb-4">
-              <Link href="/" className="flex items-center">
-                <img
-                  src={logoPath}
-                  alt="Culture Bites Logo"
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-                <span className="ml-3 text-2xl font-bold text-orange-400">Culture Bites</span>
-              </Link>
+            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3">
+              <img
+                src="/images/logo.png"
+                alt="CultureBites Logo"
+                className="h-12 w-12 sm:h-16 sm:w-16 object-contain"
+              />
+              <h1 className="text-2xl sm:text-3xl font-bold text-balance bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent">
+                CultureBites
+              </h1>
             </div>
+
             <CardTitle className="text-2xl text-orange-400">Welcome Back</CardTitle>
             <CardDescription className="text-orange-200/80">Sign in to your CultureBites account</CardDescription>
           </CardHeader>
