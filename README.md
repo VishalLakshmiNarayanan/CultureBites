@@ -560,19 +560,3 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - Traditional potluck and supper club culture
 
 ---
-
-## Contact & Support
-
-**Project Maintainer:** Vishal Lakshmi Narayanan
-**Project Link:** [https://github.com/VishalLakshmiNarayanan/CultureBites](https://github.com/VishalLakshmiNarayanan/CultureBites)
-**Live Demo:** [Culture Bites on Vercel](https://vercel.com/vishallakshminarayanans-projects/v0-melting-pot-app)
-
----
-
-<p align="center">
-  <i>"Because people bond best over food. And everyone deserves to feel at home."</i>
-</p>
-
-<p align="center">
-  Made with ❤️ and a dash of spice
-</p>
