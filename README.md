@@ -64,7 +64,7 @@ This project is **fully deployed**, **production-ready**, and built with modern 
 </a>
 </p>
 
-**Live Application:** [https://vercel.com/vishallakshminarayanans-projects/v0-melting-pot-app](https://vercel.com/vishallakshminarayanans-projects/v0-melting-pot-app)
+**Live Application:** [https://culturebites.vercel.app](https://culturebites.vercel.app)
 
 ---
 
