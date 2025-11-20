@@ -59,9 +59,7 @@ This project is **fully deployed**, **production-ready**, and built with modern 
 <a href="https://culturebites.vercel.app">
   <img src="https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel" />
 </a>
-<a href="https://v0.app/chat/projects/7IA1ZeCO7h3">
-  <img src="https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge" />
-</a>
+
 </p>
 
 **Live Application:** [https://culturebites.vercel.app](https://culturebites.vercel.app)
