@@ -230,7 +230,7 @@ Two-way marketplace enabling Cooks and Hosts to partner:
 | Request Type | Flow | Status Tracking |
 |--------------|------|----------------|
 | **Cook → Host** | Cook proposes dishes for Host's space | Pending → Accepted/Declined |
-| **Host → Cook** | Host invites Cook for specific event | Pending → Accepted/Declined |
+| **Host → Cook** | Host invites Cook for specific event | Pending → Accepted/Declined  |
 
 **Features:**
 - Proposed dish lists
