@@ -56,7 +56,7 @@ This project is **fully deployed**, **production-ready**, and built with modern 
 ## Live Deployment
 
 <p>
-<a href="https://vercel.com/vishallakshminarayanans-projects/v0-melting-pot-app">
+<a href="https://culturebites.vercel.app">
   <img src="https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel" />
 </a>
 <a href="https://v0.app/chat/projects/7IA1ZeCO7h3">
